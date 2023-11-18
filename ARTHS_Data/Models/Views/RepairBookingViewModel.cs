@@ -3,6 +3,7 @@
     public class RepairBookingViewModel
     {
         public Guid Id { get; set; }
+        public string? OrderId { get; set; }
         public DateTime DateBook { get; set; }
         public string Description { get; set; } = null!;
         public string? CancellationReason { get; set; }

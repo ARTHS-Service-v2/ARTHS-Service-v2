@@ -31,7 +31,8 @@ namespace ARTHS_Service.Implementations
         private readonly IConfigurationService _configurationService;
         private readonly IRevenueStoreRepository _revenueStoreRepository;
         private readonly IMaintenanceScheduleRepository _maintenanceScheduleRepository;
-        private readonly IWarrantyHistoryRepository _warrantyHistoryRepository;
+        
+
         public OrderService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService, IConfigurationService configurationService) : base(unitOfWork, mapper)
         {
             _orderRepository = unitOfWork.Order;
@@ -46,7 +47,7 @@ namespace ARTHS_Service.Implementations
             _configurationService = configurationService;
             _revenueStoreRepository = unitOfWork.RevenueStore;
             _maintenanceScheduleRepository = unitOfWork.MaintenanceSchedule;
-            _warrantyHistoryRepository = unitOfWork.WarrantyHistory;
+            
         }
 
         public async Task<ListViewModel<OrderViewModel>> GetOrders(OrderFilterModel filter, PaginationRequestModel pagination)
@@ -232,8 +233,14 @@ namespace ARTHS_Service.Implementations
                     if (ShouldAddStaffToOrder(model.OrderDetailModel))
                     {
                         if (!model.StaffId.HasValue) throw new BadRequestException("Vui lòng chọn nhân viên");
+                        var staff = await _accountRepository.GetMany(staff => staff.Id.Equals(model.StaffId)).FirstOrDefaultAsync();
+                        if (staff == null) throw new NotFoundException("Không tìm thấy nhân viên");
+                        if (staff.Status.Equals(UserStatus.Busy)) throw new ConflictException("Nhân viên đang bận vui lòng chọn nhân viên khác");
                         order.StaffId = model.StaffId;
+                        staff.Status = UserStatus.Busy;
 
+                        _accountRepository.Update(staff);
+                        
                         //check booking
                         if (model.BookingId.HasValue)
                         {
@@ -283,6 +290,7 @@ namespace ARTHS_Service.Implementations
                 {
                     await CreateTransaction(order);
                     await CreateMaintenanceSchedule(order.Id);
+                    await ChangeStatusOfStaff(order.StaffId);
                 }
 
                 if (model.Status.Equals(OrderStatus.WaitForPay))
@@ -314,6 +322,13 @@ namespace ARTHS_Service.Implementations
         
 
         //PRIVATE
+        private async Task ChangeStatusOfStaff(Guid? staffId)
+        {
+            var staff = await _accountRepository.GetMany(staff => staff.Id.Equals(staffId)).FirstOrDefaultAsync();
+            staff!.Status = UserStatus.Active;
+            _accountRepository.Update(staff);
+        }
+
         private async Task SendNotificationToTellers(Order order)
         {
             var message = new CreateNotificationModel

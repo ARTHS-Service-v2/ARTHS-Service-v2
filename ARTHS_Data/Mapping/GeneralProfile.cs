@@ -44,7 +44,8 @@ namespace ARTHS_Data.Mapping
                 .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.CustomerAccount != null ? src.CustomerAccount.Avatar :
                                                             (src.OwnerAccount != null ? src.OwnerAccount.Avatar :
                                                             (src.TellerAccount != null ? src.TellerAccount.Avatar :
-                                                            (src.StaffAccount != null ? src.StaffAccount.Avatar : null)))));
+                                                            (src.StaffAccount != null ? src.StaffAccount.Avatar : null)))))
+                .ForMember(dest => dest.Address, otp => otp.MapFrom(src => src.CustomerAccount != null ? src.CustomerAccount.Address : null));
 
             CreateMap<RepairService, RepairServiceViewModel>()
                 .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));

@@ -9,7 +9,7 @@ namespace ARTHS_Data.Models.Views
         public string Gender { get; set; } = null!;
         public string? Avatar { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
-
+        public string Address { get; set; } = null!;
         public string Role { get; set; } = null!;
         public string Status { get; set; } = null!;
         public DateTime CreateAt { get; set; }
