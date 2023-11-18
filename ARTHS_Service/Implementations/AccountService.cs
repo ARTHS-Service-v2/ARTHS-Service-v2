@@ -88,6 +88,10 @@ namespace ARTHS_Service.Implementations
             {
                 staffAccountsQuery = staffAccountsQuery.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
             }
+            if (!string.IsNullOrEmpty(filter.Status))
+            {
+                staffAccountsQuery = staffAccountsQuery.Where(account => account.Status.Equals(filter.Status));
+            }
 
             return await staffAccountsQuery
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
