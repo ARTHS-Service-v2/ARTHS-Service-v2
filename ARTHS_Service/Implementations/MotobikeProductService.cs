@@ -83,6 +83,18 @@ namespace ARTHS_Service.Implementations
                 baseQuery = baseQuery.OrderByDescending(p => p.CreateAt);
             }
 
+            if (filter.haveDiscount.HasValue)
+            {
+                if (filter.haveDiscount.Value)
+                {
+                    baseQuery = baseQuery.Where(product => product.DiscountId != null);
+                }
+                else
+                {
+                    baseQuery = baseQuery.Where(product => product.DiscountId == null);
+                }
+            }
+
             var totalRow = await baseQuery.AsNoTracking().CountAsync();
             var paginatedQuery = baseQuery
                 .Skip(pagination.PageNumber * pagination.PageSize)

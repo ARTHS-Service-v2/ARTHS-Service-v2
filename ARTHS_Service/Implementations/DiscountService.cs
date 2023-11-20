@@ -116,11 +116,7 @@ namespace ARTHS_Service.Implementations
                     };
 
                     _discountRepository.Add(discount);
-                    if (model.MotobikeProductId != null)
-                        await AddDiscountIdIntoMotobikeProduct(discountId, model.MotobikeProductId);
-
-                    if (model.RepairServiceId != null)
-                        await AddDiscountIdIntoRepairService(discountId, model.RepairServiceId);
+                    await AddDiscountIds(discountId, model.MotobikeProductId, model.RepairServiceId);
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
@@ -150,8 +146,7 @@ namespace ARTHS_Service.Implementations
             if (discount.EndDate > DateTime.Now)
             {
                 discount.Status = DiscountStatus.Active;
-                await AddDiscountIdIntoMotobikeProduct(id, model.MotobikeProductId);
-                await AddDiscountIdIntoRepairService(id, model.RepairServiceId);
+                await AddDiscountIds(id, model.MotobikeProductId, model.RepairServiceId);
             }
             else
             {
@@ -213,58 +208,85 @@ namespace ARTHS_Service.Implementations
             throw new NotFoundException("không tìm thấy");
         }
 
-        private async Task<ICollection<MotobikeProduct>> AddDiscountIdIntoMotobikeProduct(Guid idDiscount, ICollection<Guid>? idProducts)
+        private async Task<(ICollection<MotobikeProduct>, ICollection<RepairService>)> AddDiscountIds(Guid idDiscount, ICollection<Guid>? idProducts, ICollection<Guid>? idServices)
         {
             var listProduct = new List<MotobikeProduct>();
-            if (idProducts != null)
-            {
-                foreach (Guid product in idProducts)
-                {
-                    // Find the motobike product by its ID.
-                    var motobikeProduct = await _motobikeProductRepository
-                        .GetMany(p => p.Id == product)
-                        .FirstOrDefaultAsync();
-
-                    if (motobikeProduct != null)
-                    {
-                        // Update the DiscountId for the motobike product.
-                        motobikeProduct.DiscountId = idDiscount;
-                        _motobikeProductRepository.Update(motobikeProduct);
-                        listProduct.Add(motobikeProduct);
-                    }
-                    else
-                    {
-                        throw new NotFoundException("không tìm thấy product này: " + product);
-                    }
-                }
-            }
-            return listProduct;
-        }
-
-        private async Task<ICollection<RepairService>> AddDiscountIdIntoRepairService(Guid idDiscount, ICollection<Guid>? idService)
-        {
             var listService = new List<RepairService>();
-            if (idService != null)
-            {
-                foreach (Guid service in idService)
-                {
-                    var repairService = await _repairServiceRepository
-                        .GetMany(s => s.Id == service)
-                        .FirstOrDefaultAsync();
 
-                    if (repairService != null)
+            if (idProducts != null && idProducts.Any() || idServices != null && idServices.Any())
+            {
+                var productsAndServicesWithDiscount = new List<object>();
+
+                if (idProducts != null)
+                {
+                    foreach (Guid product in idProducts)
                     {
-                        repairService.DiscountId = idDiscount;
-                        _repairServiceRepository.Update(repairService);
-                        listService.Add(repairService);
-                    }
-                    else
-                    {
-                        throw new NotFoundException("không tìm thấy dịch vụ này: " + service);
+                        var motobikeProduct = await _motobikeProductRepository
+                            .GetMany(p => p.Id == product)
+                            .FirstOrDefaultAsync();
+
+                        if (motobikeProduct != null)
+                        {
+                            if (motobikeProduct.DiscountId == null)
+                            {
+                                motobikeProduct.DiscountId = idDiscount;
+                                _motobikeProductRepository.Update(motobikeProduct);
+                                listProduct.Add(motobikeProduct);
+                            }
+                            else
+                            {
+                                productsAndServicesWithDiscount.Add(motobikeProduct);
+                            }
+                        }
+                        else
+                        {
+                            throw new NotFoundException("Không tìm thấy product này: " + product);
+                        }
                     }
                 }
+
+                if (idServices != null)
+                {
+                    foreach (Guid service in idServices)
+                    {
+                        var repairService = await _repairServiceRepository
+                            .GetMany(s => s.Id == service)
+                            .FirstOrDefaultAsync();
+
+                        if (repairService != null)
+                        {
+                            if (repairService.DiscountId == null)
+                            {
+                                repairService.DiscountId = idDiscount;
+                                _repairServiceRepository.Update(repairService);
+                                listService.Add(repairService);
+                            }
+                            else
+                            {
+                                productsAndServicesWithDiscount.Add(repairService);
+                            }
+                        }
+                        else
+                        {
+                            throw new NotFoundException("Không tìm thấy dịch vụ này: " + service);
+                        }
+                    }
+                }
+
+                // Check if there are products or services with existing discounts.
+                if (productsAndServicesWithDiscount.Any())
+                {
+                    var names = string.Join(", ", productsAndServicesWithDiscount.Select(item => item switch
+                    {
+                        MotobikeProduct product => product.Name,
+                        RepairService service => service.Name,
+                        _ => throw new InvalidOperationException("Unexpected item type.")
+                    }));
+
+                    throw new NotFoundException($"Các sản phẩm và dịch vụ đã có mã giảm giá: {names}");
+                }
             }
-            return listService;
+            return (listProduct, listService);
         }
 
         public async Task CheckDicounts()

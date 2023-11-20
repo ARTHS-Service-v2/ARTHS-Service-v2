@@ -9,6 +9,7 @@
         public string? Status { get; set; }
         public bool? SortByNameAsc { get; set; }
         public bool? SortByPriceAsc { get; set; }
+        public bool? haveDiscount { get; set; }
 
     }
 }
