@@ -64,7 +64,17 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.OrderByDescending(p => p.CreateAt);
             }
-
+            if (filter.haveDiscount.HasValue)
+            {
+                if (filter.haveDiscount.Value)
+                {
+                    query = query.Where(service => service.DiscountId != null);
+                }
+                else
+                {
+                    query = query.Where(service => service.DiscountId == null);
+                }
+            }
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
                 .Skip(pagination.PageNumber * pagination.PageSize)
@@ -156,7 +166,7 @@ namespace ARTHS_Service.Implementations
                 throw new NotFoundException("Không tìm thấy repair service.");
             }
 
-            
+
 
             repairService.Name = model.Name ?? repairService.Name;
             repairService.Price = model.Price ?? repairService.Price;
@@ -166,7 +176,7 @@ namespace ARTHS_Service.Implementations
             repairService.ReminderInterval = model.ReminderInterval ?? repairService.ReminderInterval;
             repairService.Description = model.Description ?? repairService.Description;
             repairService.Status = model.Status ?? repairService.Status;
-            
+
 
 
 

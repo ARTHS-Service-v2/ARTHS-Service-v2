@@ -7,5 +7,6 @@ namespace ARTHS_Data.Models.Requests.Filters
         public string? Status { get; set; }
         public bool? SortByNameAsc { get; set; }
         public bool? SortByPriceAsc { get; set; }
+        public bool? haveDiscount { get; set; }
     }
 }
