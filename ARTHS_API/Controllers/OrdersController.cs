@@ -57,7 +57,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPut]
         [Route("offline/{id}")]
-        [Authorize(UserRole.Teller)]
+        [Authorize(UserRole.Teller, UserRole.Staff)]
         [ProducesResponseType(typeof(OrderViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Update offline order.")]
         public async Task<ActionResult<OrderViewModel>> UpdateOrderOffline([FromRoute] string Id, [FromBody] UpdateInStoreOrderModel model)

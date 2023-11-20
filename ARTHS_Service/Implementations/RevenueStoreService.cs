@@ -22,14 +22,11 @@ namespace ARTHS_Service.Implementations
         public async Task<ListViewModel<RevenueStoreViewModel>> GetRevenues(RevenueFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _revenueStoreRepository.GetAll().AsQueryable();
-            if (filter.Month.HasValue)
+            if (!string.IsNullOrEmpty(filter.Status))
             {
-                query = query.Where(revenue => revenue.TransactionDate.Month.Equals(filter.Month));
+                query = query.Where(revenue => revenue.Status.Equals(filter.Status));
             }
-            if (filter.Year.HasValue)
-            {
-                query = query.Where(revenue => revenue.TransactionDate.Year.Equals(filter.Year));
-            }
+            
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query

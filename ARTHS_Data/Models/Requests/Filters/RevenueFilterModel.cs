@@ -2,8 +2,6 @@
 {
     public class RevenueFilterModel
     {
-        public int? Month { get; set; }
-        public int? Year { get; set; }
-
+        public string? Status { get; set; }
     }
 }
