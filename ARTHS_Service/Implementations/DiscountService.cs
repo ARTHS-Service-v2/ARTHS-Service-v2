@@ -269,7 +269,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task CheckDicounts()
         {
-            var currentTime = DateTime.UtcNow;
+            var currentTime = DateTime.UtcNow.AddHours(7);
 
             var discountsToDiscontinue = await _discountRepository
                     .GetMany(discount => discount.EndDate.Date < currentTime.Date && discount.Status != DiscountStatus.Discontinued)

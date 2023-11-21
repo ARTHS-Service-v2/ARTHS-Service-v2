@@ -19,10 +19,13 @@ namespace ARTHS_Service.Implementations
     {
         private readonly IOrderRepository _orderRepository;
         private readonly INotificationService _notificationService;
+        private readonly IRevenueStoreRepository _revenueStoreRepository;
+
         public GhnService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService) : base(unitOfWork, mapper)
         {
             _orderRepository = unitOfWork.Order;
             _notificationService = notificationService;
+            _revenueStoreRepository = unitOfWork.RevenueStore;
         }
 
         public async Task<GhnCreateResponseModel> CreateShippingOrder(GhnCreateOrderModel model)
@@ -100,11 +103,31 @@ namespace ARTHS_Service.Implementations
                 var order = await _orderRepository.GetMany(order => order.ShippingCode != null && order.ShippingCode.Equals(model.OrderCode)).FirstOrDefaultAsync();
                 order!.Status = OrderStatus.Finished;
                 _orderRepository.Update(order);
+
+                if (order!.PaymentMethod!.Equals(PaymentMethods.COD))
+                {
+                    CreateTransaction(order);
+                }
+
                 await _unitOfWork.SaveChanges();
                 await SendNotificationToCustomer(order);
             }
         }
 
+        private void CreateTransaction(Order order)
+        {
+            var revenue = new RevenueStore
+            {
+                Id = DateTime.UtcNow.AddHours(7).ToString("yyMMdd") + "_" + order.Id,
+                OrderId = order.Id,
+                TotalAmount = order.TotalAmount,
+                Type = "Thanh toán hóa đơn mua hàng online của cửa hàng Thanh Huy",
+                PaymentMethod = PaymentMethods.COD,
+                Status = "Thành công"
+            };
+
+            _revenueStoreRepository.Add(revenue);
+        }
 
         private async Task SendNotificationToCustomer(Order order)
         {

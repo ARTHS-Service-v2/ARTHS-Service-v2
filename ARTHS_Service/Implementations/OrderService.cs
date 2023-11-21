@@ -192,7 +192,7 @@ namespace ARTHS_Service.Implementations
 
             if (ShouldCreateTransaction(order.PaymentMethod!, order.Status))
             {
-                await CreateTransaction(order);
+                CreateTransaction(order);
             }
 
             _orderRepository.Update(order);
@@ -288,14 +288,19 @@ namespace ARTHS_Service.Implementations
             {
                 if (model.Status.Equals(OrderStatus.Finished))
                 {
-                    await CreateTransaction(order);
                     await CreateMaintenanceSchedule(order.Id);
-                    await ChangeStatusOfStaff(order.StaffId);
                 }
 
                 if (model.Status.Equals(OrderStatus.WaitForPay))
                 {
+                    await ChangeStatusOfStaff(order.StaffId);
                     await SendNotificationToTellers(order);
+                }
+
+                if (model.Status.Equals(OrderStatus.Paid))
+                {
+                    CreateTransaction(order);
+                    order.PaymentMethod = PaymentMethods.COD;
                 }
                 order.Status = model.Status;
             }
@@ -348,7 +353,7 @@ namespace ARTHS_Service.Implementations
                 .ToListAsync();
             await _notificationService.SendNotification(tellers, message);
         }
-        private async Task CreateTransaction(Order order)
+        private void CreateTransaction(Order order)
         {
             var revenue = new RevenueStore
             {
@@ -361,7 +366,6 @@ namespace ARTHS_Service.Implementations
             };
 
             _revenueStoreRepository.Add(revenue);
-            await _unitOfWork.SaveChanges();
         }
 
         private bool ShouldCreateTransaction(string paymentMethod, string status)
@@ -526,6 +530,7 @@ namespace ARTHS_Service.Implementations
             int totalPrice = 0;
             foreach (var detail in listDetail)
             {
+
                 int detailPrice = 0;
                 var orderDetail = new OrderDetail
                 {
