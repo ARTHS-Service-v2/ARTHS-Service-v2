@@ -26,7 +26,14 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(revenue => revenue.Status.Equals(filter.Status));
             }
-            
+            if (filter.Month.HasValue)
+            {
+                query = query.Where(revenue => revenue.TransactionDate.Month.Equals(filter.Month));
+            }
+            if (filter.Year.HasValue)
+            {
+                query = query.Where(revenue => revenue.TransactionDate.Year.Equals(filter.Year));
+            }
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
