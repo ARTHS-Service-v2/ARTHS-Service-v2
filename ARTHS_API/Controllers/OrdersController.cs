@@ -94,7 +94,7 @@ namespace ARTHS_API.Controllers
         [SwaggerOperation(Summary = "Generate bill for order.")]
         public async Task<ActionResult<string>> Get([FromRoute] string Id)
         {
-            var result = await _invoiceService.GenerateInvoice(Id, "D:\\invoice");
+            var result = await _invoiceService.GenerateInvoice(Id);
             return Ok(result);
         }
 

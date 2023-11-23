@@ -8,6 +8,9 @@ using PdfSharp.Pdf;
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using ARTHS_Data.Entities;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
 
 namespace ARTHS_Service.Implementations
 {
@@ -19,7 +22,7 @@ namespace ARTHS_Service.Implementations
             _orderRepository = unitOfWork.Order;
         }
 
-        public async Task<string> GenerateInvoice(string orderId, string folderPath)
+        public async Task<string> GenerateInvoice(string orderId)
         {
             try
             {
@@ -35,11 +38,7 @@ namespace ARTHS_Service.Implementations
                 {
                     return "Lỗi: Đơn hàng không tồn tại.";
                 }
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
-                }
-
+                
                 PdfDocument document = new PdfDocument();
                 PdfPage page = document.AddPage();
                 XGraphics gfx = XGraphics.FromPdfPage(page);
@@ -70,12 +69,36 @@ namespace ARTHS_Service.Implementations
                 startY = DrawWarrantyTable(gfx, page, order, startY);
 
                 // 7. Signature
-                DrawSignatureSection(gfx, page);
+                //DrawSignatureSection(gfx, page);
 
 
 
-                string filePath = SaveDocument(document, orderId, folderPath);
-                return "Thành công, file được lưu tại: " + filePath;
+                // Lưu tệp PDF vào Blob Storage
+                var blobServiceClient = new BlobServiceClient("DefaultEndpointsProtocol=https;AccountName=arthsstoragev1;AccountKey=NTLe0PSFGUdg2IaZCyhKk/zqT+C4Unw8utbFWT2Rr5I4Gwz3mJtcaLPrshM5MeLufBRO4rYO5u7O+AStR3kOiQ==;EndpointSuffix=core.windows.net"); // Thay thế bằng Connection String thực tế
+                var containerClient = blobServiceClient.GetBlobContainerClient("arths-bill");
+                var blobClient = containerClient.GetBlobClient($"{orderId}.pdf");
+
+                await using (var ms = new MemoryStream())
+                {
+                    document.Save(ms);
+                    ms.Position = 0;
+                    await blobClient.UploadAsync(ms, new BlobHttpHeaders { ContentType = "application/pdf" });
+                }
+
+                // Tạo Shared Access Signature (SAS) cho Blob
+                BlobSasBuilder sasBuilder = new BlobSasBuilder()
+                {
+                    BlobContainerName = containerClient.Name,
+                    BlobName = blobClient.Name,
+                    Resource = "b",
+                    StartsOn = DateTimeOffset.UtcNow,
+                    ExpiresOn = DateTimeOffset.UtcNow.AddHours(1) // SAS hết hạn sau 1 giờ
+                };
+                sasBuilder.SetPermissions(BlobSasPermissions.Read); // Chỉ đặt quyền đọc
+
+                string sasToken = blobClient.GenerateSasUri(sasBuilder).ToString();
+
+                return sasToken; // Trả về URL có SAS
             }
             catch (Exception ex)
             {

@@ -88,7 +88,10 @@ namespace ARTHS_Data.Mapping
             CreateMap<Order, OrderViewModel>();
             CreateMap<Order, BasicOrderViewModel>();
             CreateMap<OrderDetail, OrderDetailViewModel>();
-            CreateMap<RevenueStore, RevenueStoreViewModel>();
+            CreateMap<RevenueStore, RevenueStoreViewModel>()
+                .ForMember(dest => dest.OrderType, otp => otp.MapFrom(src =>src.Order!.OrderType));
+            CreateMap<RevenueStore, StaticsViewModel>()
+                .ForMember(dest => dest.OrderType, otp => otp.MapFrom(src => src.Order!.OrderType));
             CreateMap<WarrantyHistory, WarrantyHistoryViewModel>();
             CreateMap<Configuration, ConfigurationViewModel>();
             CreateMap<Discount, BasicDiscountViewModel>();

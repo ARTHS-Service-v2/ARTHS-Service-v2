@@ -11,6 +11,6 @@
         public DateTime? UpdateAt { get; set; }
         public DateTime TransactionDate { get; set; }
 
-        //public virtual Order? Order { get; set; }
+        public string OrderType { get; set; } = null!;
     }
 }

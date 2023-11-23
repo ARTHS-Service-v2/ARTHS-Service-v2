@@ -8,5 +8,6 @@ namespace ARTHS_Service.Interfaces
     {
         Task<ListViewModel<RevenueStoreViewModel>> GetRevenues(RevenueFilterModel filter, PaginationRequestModel pagination);
         Task<RevenueStoreViewModel> GetRevenue(string Id);
+        Task<List<StaticsViewModel>> GetStatics(int? year);
     }
 }

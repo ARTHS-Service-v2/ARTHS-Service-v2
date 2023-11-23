@@ -8,6 +8,7 @@ using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using PdfSharp.Pdf.Filters;
 
 namespace ARTHS_Service.Implementations
 {
@@ -17,6 +18,21 @@ namespace ARTHS_Service.Implementations
         public RevenueStoreService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
             _revenueStoreRepository = unitOfWork.RevenueStore;
+        }
+
+        public async Task<List<StaticsViewModel>> GetStatics(int? year)
+        {
+            var query = _revenueStoreRepository.GetAll().AsQueryable();
+            
+            if (year.HasValue)
+            {
+                query = query.Where(revenue => revenue.TransactionDate.Year.Equals(year));
+            }
+
+            return await query
+                .ProjectTo<StaticsViewModel>(_mapper.ConfigurationProvider)
+                .OrderByDescending(date => date.TransactionDate)
+                .ToListAsync();
         }
 
         public async Task<ListViewModel<RevenueStoreViewModel>> GetRevenues(RevenueFilterModel filter, PaginationRequestModel pagination)

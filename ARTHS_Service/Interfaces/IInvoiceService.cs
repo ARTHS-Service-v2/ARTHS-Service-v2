@@ -2,6 +2,6 @@
 {
     public interface IInvoiceService
     {
-        Task<string> GenerateInvoice(string orderId, string folderPath);
+        Task<string> GenerateInvoice(string orderId);
     }
 }

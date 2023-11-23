@@ -60,7 +60,7 @@ namespace ARTHS_Service.Implementations
             }
             if (filter.CustomerId.HasValue)
             {
-                query = query.Where(order => order.CustomerId.Equals(filter.StaffId));
+                query = query.Where(order => order.CustomerId.Equals(filter.CustomerId));
             }
             if (!string.IsNullOrEmpty(filter.OrderId))
             {

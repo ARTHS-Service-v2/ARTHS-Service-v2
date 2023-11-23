@@ -25,5 +25,14 @@ namespace ARTHS_API.Controllers
         {
             return await _revenueStoreService.GetRevenues(filter, pagination);
         }
+
+        [HttpGet]
+        [Route("statics")]
+        [ProducesResponseType(typeof(List<StaticsViewModel>), StatusCodes.Status200OK)]
+        [SwaggerOperation(Summary = "Get statics")]
+        public async Task<ActionResult<List<StaticsViewModel>>> GetStatics([FromQuery] int? year)
+        {
+            return await _revenueStoreService.GetStatics(year);
+        }
     }
 }
