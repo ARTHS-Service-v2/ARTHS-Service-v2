@@ -28,8 +28,6 @@ namespace ARTHS_Service.Implementations
         {
             try
             {
-                GlobalFontSettings.FontResolver = new CustomFontResolver();
-
                 var order = await _orderRepository.GetMany(order => order.Id.Equals(orderId))
                     .Include(order => order.OrderDetails)
                         .ThenInclude(detail => detail.MotobikeProduct)

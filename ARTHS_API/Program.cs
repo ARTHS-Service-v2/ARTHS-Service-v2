@@ -1,14 +1,16 @@
 ﻿using ARTHS_API.Configurations;
 using ARTHS_Data.Entities;
 using ARTHS_Data.Mapping;
+using ARTHS_Utility.Helpers.Fonts;
 using ARTHS_Utility.Settings;
-using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using PdfSharp.Fonts;
 
 var builder = WebApplication.CreateBuilder(args);
+GlobalFontSettings.FontResolver = new CustomFontResolver();
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 
