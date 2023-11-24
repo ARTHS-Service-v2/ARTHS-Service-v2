@@ -11,6 +11,8 @@ using ARTHS_Data.Entities;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
+using ARTHS_Utility.Helpers.Fonts;
+using PdfSharp.Fonts;
 
 namespace ARTHS_Service.Implementations
 {
@@ -26,6 +28,8 @@ namespace ARTHS_Service.Implementations
         {
             try
             {
+                GlobalFontSettings.FontResolver = new CustomFontResolver();
+
                 var order = await _orderRepository.GetMany(order => order.Id.Equals(orderId))
                     .Include(order => order.OrderDetails)
                         .ThenInclude(detail => detail.MotobikeProduct)
@@ -113,7 +117,7 @@ namespace ARTHS_Service.Implementations
             // Fonts
             XFont headerFont = new XFont("Verdana", 20, XFontStyle.Bold, new XPdfFontOptions(PdfFontEncoding.Unicode));
             XFont detailsFont = new XFont("Verdana", 10, XFontStyle.Regular, new XPdfFontOptions(PdfFontEncoding.Unicode));
-            XFont contentFont = new XFont("Verdana", 10, XFontStyle.Regular, new XPdfFontOptions(PdfFontEncoding.Unicode));
+            //XFont contentFont = new XFont("Verdana", 10, XFontStyle.Regular, new XPdfFontOptions(PdfFontEncoding.Unicode));
 
             // Formats
             XStringFormat centerFormat = new XStringFormat { Alignment = XStringAlignment.Center, LineAlignment = XLineAlignment.Center };
