@@ -46,6 +46,30 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(repair => repair.Status.Contains(filter.Status));
             }
+            if (filter.DiscountId.HasValue)
+            {
+                if(filter.HaveDiscount.HasValue && filter.HaveDiscount.Value.Equals(false))
+                {
+                    query = query.Where(repair => repair.DiscountId.Equals(filter.DiscountId.Value) || repair.DiscountId == null);
+                }
+                else
+                {
+                    query = query.Where(repair => repair.DiscountId.Equals(filter.DiscountId.Value));
+                }
+
+            }
+            if (filter.HaveDiscount.HasValue && !filter.DiscountId.HasValue)
+            {
+                if (filter.HaveDiscount.Value)
+                {
+                    query = query.Where(service => service.DiscountId != null);
+                }
+                else
+                {
+                    query = query.Where(service => service.DiscountId == null);
+                }
+            }
+
             // Sorting logic
             if (filter.SortByNameAsc.HasValue)
             {
@@ -64,17 +88,7 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.OrderByDescending(p => p.CreateAt);
             }
-            if (filter.haveDiscount.HasValue)
-            {
-                if (filter.haveDiscount.Value)
-                {
-                    query = query.Where(service => service.DiscountId != null);
-                }
-                else
-                {
-                    query = query.Where(service => service.DiscountId == null);
-                }
-            }
+            
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
                 .Skip(pagination.PageNumber * pagination.PageSize)

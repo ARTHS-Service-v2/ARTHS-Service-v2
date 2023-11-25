@@ -56,7 +56,26 @@ namespace ARTHS_Service.Implementations
 
             if (filter.DiscountId.HasValue)
             {
-                baseQuery = baseQuery.Where(product => product.DiscountId.Equals(filter.DiscountId.Value));
+                if (filter.HaveDiscount.HasValue && filter.HaveDiscount.Value.Equals(false))
+                {
+                    baseQuery = baseQuery.Where(product => product.DiscountId.Equals(filter.DiscountId.Value) || product.DiscountId == null);
+                }
+                else
+                {
+                    baseQuery = baseQuery.Where(product => product.DiscountId.Equals(filter.DiscountId.Value));
+                }
+            }
+
+            if (filter.HaveDiscount.HasValue && !filter.DiscountId.HasValue)
+            {
+                if (filter.HaveDiscount.Value)
+                {
+                    baseQuery = baseQuery.Where(product => product.DiscountId != null);
+                }
+                else
+                {
+                    baseQuery = baseQuery.Where(product => product.DiscountId == null);
+                }
             }
 
             if (!string.IsNullOrEmpty(filter.Status))
@@ -83,17 +102,7 @@ namespace ARTHS_Service.Implementations
                 baseQuery = baseQuery.OrderByDescending(p => p.CreateAt);
             }
 
-            if (filter.haveDiscount.HasValue)
-            {
-                if (filter.haveDiscount.Value)
-                {
-                    baseQuery = baseQuery.Where(product => product.DiscountId != null);
-                }
-                else
-                {
-                    baseQuery = baseQuery.Where(product => product.DiscountId == null);
-                }
-            }
+            
 
             var totalRow = await baseQuery.AsNoTracking().CountAsync();
             var paginatedQuery = baseQuery
