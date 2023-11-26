@@ -190,6 +190,10 @@ namespace ARTHS_Service.Implementations
 
             order.Status = model.Status ?? order.Status;
 
+            if (order.Status.Equals(OrderStatus.Confirm))
+            {
+                await SendNotificationConfirmToCustomer(order);
+            }
             if (ShouldCreateTransaction(order.PaymentMethod!, order.Status))
             {
                 CreateTransaction(order);
@@ -592,8 +596,22 @@ namespace ARTHS_Service.Implementations
             //var staffId = await _accountRepository.GetMany(account => account.Id.Equals(order.StaffId)).Select(account => account.Id).FirstOrDefaultAsync();
             await _notificationService.SendNotification(new List<Guid> { (Guid)order.StaffId! }, message);
         }
+        private async Task SendNotificationConfirmToCustomer(Order order)
+        {
+            var message = new CreateNotificationModel
+            {
+                Title = $"Đơn hàng của bạn đã được xác nhận.",
+                Body = $"Đơn hàng {order.Id} của bạn đã được xác nhận. Cảm ơn bạn đã sử dụng dịch vụ bên chúng tôi.",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    Type = NotificationType.RepairService.ToString(),
+                    Link = order.Id
+                }
+            };
+            await _notificationService.SendNotification(new List<Guid> { (Guid)order.CustomerId! }, message);
+        }
 
-        
 
     }
 }

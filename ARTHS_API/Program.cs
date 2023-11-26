@@ -38,8 +38,8 @@ builder.Services.AddCors(options =>
                           policy.AllowAnyHeader();
                           policy.AllowAnyMethod();
                           policy.WithOrigins(
-                              "http://127.0.0.1:5173");
-                          //    "http://localhost:51509",
+                              "http://127.0.0.1:5173",
+                              "https://thanh-huy-motorbike.vercel.app");
                           //    "https://egift-d50fc.web.app",
                           //"https://egiftadmin-add56.web.app");
                           policy.AllowCredentials();

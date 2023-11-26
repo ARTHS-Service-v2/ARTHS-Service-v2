@@ -38,6 +38,10 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
             }
+            if (!string.IsNullOrEmpty(filter.Status))
+            {
+                query = query.Where(account => account.Status.Contains(filter.Status));
+            }
             var listAccount = query
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
                 .OrderByDescending(account => account.CreateAt);

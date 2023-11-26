@@ -133,7 +133,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task<RepairBookingViewModel> UpdateBooking(Guid repairBookingId, UpdateRepairBookingModel model)
         {
-            var booking = await _repairBookingRepository.GetMany(booking => booking.Id.Equals(repairBookingId)).FirstOrDefaultAsync();
+            var booking = await _repairBookingRepository.GetMany(booking => booking.Id.Equals(repairBookingId)).Include(booking => booking.Customer).FirstOrDefaultAsync();
             if (booking == null) throw new NotFoundException("Không tìm thấy thông tin booking.");
 
             if (model.Status == RepairBookingStatus.Canceled && string.IsNullOrEmpty(model.CancellationReason))

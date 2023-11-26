@@ -153,7 +153,7 @@ namespace ARTHS_Service.Implementations
             var message = new CreateNotificationModel
             {
                 Title = $"Đơn hàng đã được bàn giao cho đơn vị vận chuyển.",
-                Body = $"Đơn hàng {order.Id} của bạn được bàn giao cho đơn vị vận chuyển. Mã vận đơn {order.ShippingCode}. Cảm ơn bạn đã sử dụng dịch vụ bên chúng tôi.",
+                Body = $"Đơn hàng {order.Id} của bạn đã được bàn giao cho đơn vị vận chuyển GIAOHANGNHANH. Mã vận đơn {order.ShippingCode}. Cảm ơn bạn đã sử dụng dịch vụ bên chúng tôi.",
                 Data = new NotificationDataViewModel
                 {
                     CreateAt = DateTime.UtcNow.AddHours(7),
