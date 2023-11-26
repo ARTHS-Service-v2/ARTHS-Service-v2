@@ -11,6 +11,7 @@ using ARTHS_Utility.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ARTHS_Service.Implementations
 {
@@ -42,6 +43,12 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(account => account.Status.Contains(filter.Status));
             }
+            if (!string.IsNullOrEmpty(filter.ExcludeOrderStatus))
+            {
+                query = query.Where(order => !order.Status.Equals(filter.ExcludeOrderStatus));
+            }
+            
+
             var listAccount = query
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
                 .OrderByDescending(account => account.CreateAt);
@@ -74,7 +81,14 @@ namespace ARTHS_Service.Implementations
             {
                 customerAccountQuery = customerAccountQuery.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
             }
-
+            if (!string.IsNullOrEmpty(filter.Status))
+            {
+                customerAccountQuery = customerAccountQuery.Where(account => account.Status.Contains(filter.Status));
+            }
+            if (!string.IsNullOrEmpty(filter.ExcludeOrderStatus))
+            {
+                customerAccountQuery = customerAccountQuery.Where(order => !order.Status.Equals(filter.ExcludeOrderStatus));
+            }
             return await customerAccountQuery
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -96,6 +110,10 @@ namespace ARTHS_Service.Implementations
             {
                 staffAccountsQuery = staffAccountsQuery.Where(account => account.Status.Equals(filter.Status));
             }
+            if (!string.IsNullOrEmpty(filter.ExcludeOrderStatus))
+            {
+                staffAccountsQuery = staffAccountsQuery.Where(order => !order.Status.Equals(filter.ExcludeOrderStatus));
+            }
 
             return await staffAccountsQuery
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
@@ -114,7 +132,14 @@ namespace ARTHS_Service.Implementations
             {
                 ownerAccountsQuery = ownerAccountsQuery.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
             }
-
+            if (!string.IsNullOrEmpty(filter.Status))
+            {
+                ownerAccountsQuery = ownerAccountsQuery.Where(account => account.Status.Contains(filter.Status));
+            }
+            if (!string.IsNullOrEmpty(filter.ExcludeOrderStatus))
+            {
+                ownerAccountsQuery = ownerAccountsQuery.Where(order => !order.Status.Equals(filter.ExcludeOrderStatus));
+            }
             return await ownerAccountsQuery
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -132,7 +157,14 @@ namespace ARTHS_Service.Implementations
             {
                 tellerAccountsQuery = tellerAccountsQuery.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
             }
-
+            if (!string.IsNullOrEmpty(filter.Status))
+            {
+                tellerAccountsQuery = tellerAccountsQuery.Where(account => account.Status.Contains(filter.Status));
+            }
+            if (!string.IsNullOrEmpty(filter.ExcludeOrderStatus))
+            {
+                tellerAccountsQuery = tellerAccountsQuery.Where(order => !order.Status.Equals(filter.ExcludeOrderStatus));
+            }
             return await tellerAccountsQuery
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
