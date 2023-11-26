@@ -213,10 +213,20 @@ namespace ARTHS_Service.Implementations
             if (isUpdate)
             {
                 var existProduct = await _motobikeProductRepository.GetMany(product => product.DiscountId.Equals(idDiscount)).ToListAsync();
-                _motobikeProductRepository.RemoveRange(existProduct);
+                foreach(var product in existProduct)
+                {
+                    product.DiscountId = null;
+                    _motobikeProductRepository.Update(product);
+                }
+                //_motobikeProductRepository.RemoveRange(existProduct);
 
                 var existService = await _repairServiceRepository.GetMany(service => service.DiscountId.Equals(idDiscount)).ToListAsync();
-                _repairServiceRepository.RemoveRange(existService);
+                foreach (var service in existService)
+                {
+                    service.DiscountId = null;
+                    _repairServiceRepository.Update(service);
+                }
+                //_repairServiceRepository.RemoveRange(existService);
             }
 
             var listProduct = new List<MotobikeProduct>();
