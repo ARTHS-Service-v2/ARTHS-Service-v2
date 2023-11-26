@@ -47,10 +47,10 @@ namespace ARTHS_Service.Implementations
                 .Include(staff => staff.FeedbackStaffs)
                 .FirstOrDefaultAsync();
             if (staff == null) throw new NotFoundException("Không tìm thấy staff");
-            if(staff.FeedbackStaffs.Any(feeback => feeback.CustomerId.Equals(model.CustomerId)))
-            {
-                throw new ConflictException("Mỗi customer chỉ được tạo một feedback");
-            }
+            //if(staff.FeedbackStaffs.Any(feeback => feeback.CustomerId.Equals(model.CustomerId)))
+            //{
+            //    throw new ConflictException("Mỗi customer chỉ được tạo một feedback");
+            //}
             var feedbackId = Guid.NewGuid();
             var feedback = new FeedbackStaff
             {
@@ -70,10 +70,10 @@ namespace ARTHS_Service.Implementations
             var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(model.MotobikeProductId))
                 .Include(product => product.FeedbackProducts).FirstOrDefaultAsync();
             if (product == null) throw new NotFoundException("Không tìm thấy product");
-            if (product.FeedbackProducts.Any(feebback => feebback.CustomerId.Equals(customerId)))
-            {
-                throw new ConflictException("Mỗi customer chỉ được tạo một feedback");
-            }
+            //if (product.FeedbackProducts.Any(feebback => feebback.CustomerId.Equals(customerId)))
+            //{
+            //    throw new ConflictException("Mỗi customer chỉ được tạo một feedback");
+            //}
 
             var feedbackId = Guid.NewGuid();
             var feedback = new FeedbackProduct
