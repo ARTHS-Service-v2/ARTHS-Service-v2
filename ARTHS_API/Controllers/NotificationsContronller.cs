@@ -31,7 +31,7 @@ namespace ARTHS_API.Controllers
 
 
         [HttpGet]
-        [Authorize(UserRole.Teller, UserRole.Customer, UserRole.Owner)]
+        [Authorize(UserRole.Teller, UserRole.Customer, UserRole.Owner, UserRole.Staff)]
         [ProducesResponseType(typeof(ListViewModel<NotificationViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all notifications of logged in account.")]
         public async Task<ActionResult<ListViewModel<NotificationViewModel>>> GetNotifications([FromQuery] PaginationRequestModel pagination)

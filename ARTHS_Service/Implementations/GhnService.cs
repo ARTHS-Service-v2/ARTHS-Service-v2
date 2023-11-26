@@ -87,6 +87,9 @@ namespace ARTHS_Service.Implementations
                 order.Status = OrderStatus.Transport;
                 order.ShippingCode = resutl.OrderCode;
                 _orderRepository.Update(order);
+
+                await SendNotificationTransportToCustomer(order);
+
                 var save = await _unitOfWork.SaveChanges();
 
                 return save > 0 ? resutl : throw new BadRequestException("Lỗi khi update trạng thái đơn");
@@ -135,6 +138,22 @@ namespace ARTHS_Service.Implementations
             {
                 Title = $"Giao hàng thành công.",
                 Body = $"Đơn hàng {order.Id} của bạn được giao thành công. Cảm ơn bạn đã sử dụng dịch vụ bên chúng tôi.",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    Type = NotificationType.RepairService.ToString(),
+                    Link = order.Id
+                }
+            };
+            await _notificationService.SendNotification(new List<Guid> { (Guid)order.CustomerId! }, message);
+        }
+
+        private async Task SendNotificationTransportToCustomer(Order order)
+        {
+            var message = new CreateNotificationModel
+            {
+                Title = $"Đơn hàng đã được bàn giao cho đơn vị vận chuyển.",
+                Body = $"Đơn hàng {order.Id} của bạn được bàn giao cho đơn vị vận chuyển. Mã vận đơn {order.ShippingCode}. Cảm ơn bạn đã sử dụng dịch vụ bên chúng tôi.",
                 Data = new NotificationDataViewModel
                 {
                     CreateAt = DateTime.UtcNow.AddHours(7),
