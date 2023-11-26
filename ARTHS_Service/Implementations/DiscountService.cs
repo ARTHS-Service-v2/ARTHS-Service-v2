@@ -116,7 +116,7 @@ namespace ARTHS_Service.Implementations
                     };
 
                     _discountRepository.Add(discount);
-                    await AddDiscountIds(discountId, model.MotobikeProductId, model.RepairServiceId);
+                    await AddDiscountIds(discountId, model.MotobikeProductId, model.RepairServiceId, false);
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
@@ -146,7 +146,7 @@ namespace ARTHS_Service.Implementations
             if (discount.EndDate > DateTime.Now)
             {
                 discount.Status = DiscountStatus.Active;
-                await AddDiscountIds(id, model.MotobikeProductId, model.RepairServiceId);
+                await AddDiscountIds(id, model.MotobikeProductId, model.RepairServiceId, true);
             }
             else
             {
@@ -208,11 +208,20 @@ namespace ARTHS_Service.Implementations
             throw new NotFoundException("không tìm thấy");
         }
 
-        private async Task<(ICollection<MotobikeProduct>, ICollection<RepairService>)> AddDiscountIds(Guid idDiscount, ICollection<Guid>? idProducts, ICollection<Guid>? idServices)
+        private async Task<(ICollection<MotobikeProduct>, ICollection<RepairService>)> AddDiscountIds(Guid idDiscount, ICollection<Guid>? idProducts, ICollection<Guid>? idServices, bool isUpdate)
         {
+            if (isUpdate)
+            {
+                var existProduct = await _motobikeProductRepository.GetMany(product => product.DiscountId.Equals(idDiscount)).ToListAsync();
+                _motobikeProductRepository.RemoveRange(existProduct);
+
+                var existService = await _repairServiceRepository.GetMany(service => service.DiscountId.Equals(idDiscount)).ToListAsync();
+                _repairServiceRepository.RemoveRange(existService);
+            }
+
             var listProduct = new List<MotobikeProduct>();
             var listService = new List<RepairService>();
-
+            
             if (idProducts != null && idProducts.Any() || idServices != null && idServices.Any())
             {
                 var productsAndServicesWithDiscount = new List<object>();
