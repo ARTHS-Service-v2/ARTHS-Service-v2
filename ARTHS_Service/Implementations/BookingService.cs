@@ -8,6 +8,7 @@ using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Enums;
 using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -19,14 +20,15 @@ namespace ARTHS_Service.Implementations
     public class BookingService : BaseService, IBookingService
     {
         private readonly IRepairBookingRepository _repairBookingRepository;
-
+        private readonly INotificationService _notificationService;
         private readonly IConfigurationService _configurationService;
 
 
-        public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IConfigurationService configurationService) : base(unitOfWork, mapper)
+        public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IConfigurationService configurationService, INotificationService notificationService) : base(unitOfWork, mapper)
         {
             _repairBookingRepository = unitOfWork.RepairBooking;
             _configurationService = configurationService;
+            _notificationService = notificationService;
         }
 
         public async Task<ListViewModel<RepairBookingViewModel>> GetRepairBookings(BookingFilterModel filter, PaginationRequestModel pagination)
@@ -180,6 +182,10 @@ namespace ARTHS_Service.Implementations
             booking.Description = model.Description ?? booking.Description;
             booking.Status = model.Status ?? booking.Status;
 
+            if (booking.Status.Equals(RepairBookingStatus.Confirmed))
+            {
+                await SendNotificationBookingToStaff(booking);
+            }
             _repairBookingRepository.Update(booking);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetRepairBooking(repairBookingId) : null!;
@@ -221,6 +227,22 @@ namespace ARTHS_Service.Implementations
             {
                 throw new ConflictException("Vui lòng nhập đúng định dạng thời gian (hh:mm)");
             }
+        }
+
+        private async Task SendNotificationBookingToStaff(RepairBooking booking)
+        {
+            var message = new CreateNotificationModel
+            {
+                Title = $"Bạn có lịch đặt ngày {booking.CancellationDate}.",
+                Body = $"Khách hàng {booking.Customer.FullName} đã đặt lịch sữa chữa với bạn. Khách hàng dự kiến tới {booking.DateBook.ToString("dd-MM-yyyy")}. Vui lòng chú ý lịch đặt",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    Type = NotificationType.RepairService.ToString(),
+                    Link = booking.Id.ToString(),
+                }
+            };
+            await _notificationService.SendNotification(new List<Guid> { (Guid)booking.StaffId! }, message);
         }
 
     }
