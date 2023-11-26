@@ -33,7 +33,7 @@ namespace ARTHS_Service.Implementations
             {
                 throw new BadRequestException("Vui lòng nhập các giá trị total staff, service time, workHours khác 0");
             }
-            var config = await _configurationRepository.GetAll().FirstOrDefaultAsync();
+            var config = await _configurationRepository.GetMany(config => config.Id.Equals("config")).FirstOrDefaultAsync();
             if (config == null) { throw new BadRequestException(""); }
 
             config.TotalStaff = model.TotalStaff ?? config.TotalStaff;
@@ -42,14 +42,14 @@ namespace ARTHS_Service.Implementations
             config.NonBookingPercentage = model.NonBookingPercentage ?? config.NonBookingPercentage;
             config.ShippingMoney = model.ShippingMoney ?? config.ShippingMoney;
 
-            _configurationRepository.Add(config);
+            _configurationRepository.Update(config);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetSetting() : null!;
         }
 
         public async Task<int> CalculateDailyOnlineBookings()
         {
-            var config = await _configurationRepository.GetAll().FirstOrDefaultAsync();
+            var config = await _configurationRepository.GetMany(config => config.Id.Equals("config")).FirstOrDefaultAsync();
             if (config == null) { throw new BadRequestException(""); }
 
             int motosPerStaff = config.WorkHours / config.ServiceTime;

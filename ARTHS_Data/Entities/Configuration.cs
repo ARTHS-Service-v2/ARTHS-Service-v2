@@ -5,6 +5,7 @@ namespace ARTHS_Data.Entities
 {
     public partial class Configuration
     {
+        public string Id { get; set; } = null!;
         public int TotalStaff { get; set; }
         public int WorkHours { get; set; }
         public int ServiceTime { get; set; }
