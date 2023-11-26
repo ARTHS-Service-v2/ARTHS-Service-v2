@@ -4,6 +4,7 @@ using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Constants;
 using ARTHS_Utility.Exceptions;
 using ARTHS_Utility.Helpers;
 using ARTHS_Utility.Settings;
@@ -39,6 +40,10 @@ namespace ARTHS_Service.Implementations
 
             if (account != null && PasswordHasher.VerifyPassword(auth.Password, account.PasswordHash))
             {
+                if (!account.Status.Equals(UserStatus.Active) && !account.Status.Equals(UserStatus.Busy))
+                {
+                    throw new BadRequestException("Tài khoản của bạn đã bị khóa hoặc chưa kích hoạt vui lòng liên hệ admin để mở khóa.");
+                }
                 var accessToken = GenerateJwtToken(new AuthModel
                 {
                     Id = account.Id,

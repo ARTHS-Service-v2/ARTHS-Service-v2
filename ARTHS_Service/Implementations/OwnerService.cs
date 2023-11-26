@@ -77,6 +77,7 @@ namespace ARTHS_Service.Implementations
             {
                 owner.FullName = model.FullName ?? owner.FullName;
                 owner.Gender = model.Gender ?? owner.Gender;
+                owner.Account.Status = model.Status ?? owner.Account.Status;
 
                 if (!string.IsNullOrEmpty(model.OldPassword))
                 {

@@ -101,7 +101,7 @@ namespace ARTHS_Service.Implementations
         public async Task<List<AccountViewModel>> GetOwners(AccountFilterModel filter)
         {
             //Chỉ lấy owner
-            var ownerAccountsQuery = _accountRepository.GetAll().Where(account => account.OwnerAccount != null);
+            var ownerAccountsQuery = _accountRepository.GetAll().Where(account => account.OwnerAccount != null && account.Role.RoleName.Equals(UserRole.Owner));
             if (!string.IsNullOrEmpty(filter.FullName))
             {
                 ownerAccountsQuery = ownerAccountsQuery.Where(account => account.OwnerAccount!.FullName.Contains(filter.FullName));
@@ -163,7 +163,7 @@ namespace ARTHS_Service.Implementations
                 PhoneNumber = phoneNumber,
                 PasswordHash = passwordHash,
                 RoleId = accountRole.Id,
-                Status = UserStatus.Pending
+                Status = UserStatus.Active
             };
             _accountRepository.Add(account);
 

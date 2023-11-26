@@ -76,6 +76,7 @@ namespace ARTHS_Service.Implementations
             {
                 staff.FullName = model.FullName ?? staff.FullName;
                 staff.Gender = model.Gender ?? staff.Gender;
+                staff.Account.Status = model.Status ?? staff.Account.Status;
 
                 if (!string.IsNullOrEmpty(model.OldPassword))
                 {

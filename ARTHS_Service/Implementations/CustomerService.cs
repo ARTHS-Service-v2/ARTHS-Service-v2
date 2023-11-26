@@ -93,6 +93,7 @@ namespace ARTHS_Service.Implementations
                 customer.FullName = model.FullName ?? customer.FullName;
                 customer.Gender = model.Gender ?? customer.Gender;
                 customer.Address = model.Address ?? customer.Address;
+                customer.Account.Status = model.Status ?? customer.Account.Status;
 
                 if (!string.IsNullOrEmpty(model.OldPassword))
                 {

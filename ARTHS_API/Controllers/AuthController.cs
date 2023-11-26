@@ -79,7 +79,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [Authorize(UserRole.Owner, UserRole.Teller, UserRole.Staff, UserRole.Customer)]
+        [Authorize(UserRole.Owner, UserRole.Teller, UserRole.Staff, UserRole.Customer, UserRole.Admin)]
         [ProducesResponseType(typeof(AccountViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [SwaggerOperation(Summary = "Retrieve logged-in account details.")]
