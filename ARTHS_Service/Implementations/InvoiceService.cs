@@ -190,15 +190,16 @@ namespace ARTHS_Service.Implementations
             double tableWidth = page.Width - (2 * columnMargin);
             double[] columnWidths = {
             0.05 * tableWidth,  // STT
-            0.4 * tableWidth,   // Product Name
+            0.35 * tableWidth,   // Product Name
             0.1 * tableWidth,   // Quantity
-            0.2 * tableWidth,   // Price
-            0.25 * tableWidth   // Total
+            0.15 * tableWidth,   // Price
+            0.15 * tableWidth,   // Fee
+            0.2 * tableWidth   // Total
         };
 
             // Table Headers
-            string[] headers = { "STT", "Tên thiết bị", "SL", "Đơn giá", "Thành tiền" };
-            XStringFormat[] headerFormats = { centerFormat, centerFormat, centerFormat, centerFormat, centerFormat };
+            string[] headers = { "STT", "Tên thiết bị", "SL", "Đơn giá", "Phí lắp đặt", "Thành tiền" };
+            XStringFormat[] headerFormats = { centerFormat, centerFormat, centerFormat, centerFormat, centerFormat, centerFormat };
 
             double currentX = columnMargin;
             for (int i = 0; i < headers.Length; i++)
@@ -248,10 +249,14 @@ namespace ARTHS_Service.Implementations
                 gfx.DrawString(formattedPrice, contentFont, XBrushes.Black, new XRect(currentX, rowStartY, columnWidths[3], rowHeight), centerFormat);
                 currentX += columnWidths[3];
 
-                double? total = (double?)(detail.Price * detail.Quantity);
+                string formattedPriceInst = string.Format("{0:N0}", detail.InstUsed.Equals(true) ? detail.MotobikeProduct?.InstallationFee : 0);
+                gfx.DrawString(formattedPriceInst, contentFont, XBrushes.Black, new XRect(currentX, rowStartY, columnWidths[4], rowHeight), centerFormat);
+                currentX += columnWidths[4];
+
+                double? total = (double?)(detail.Price * detail.Quantity) + double.Parse(formattedPriceInst);
                 totalAmount += total.GetValueOrDefault(); // Cộng dồn tổng tiền
                 string formattedTotal = string.Format("{0:N0}", total);
-                gfx.DrawString(formattedTotal, contentFont, XBrushes.Black, new XRect(currentX, rowStartY, columnWidths[4], rowHeight), centerFormat);
+                gfx.DrawString(formattedTotal, contentFont, XBrushes.Black, new XRect(currentX, rowStartY, columnWidths[5], rowHeight), centerFormat);
 
                 // Drawing cell borders
                 currentX = columnMargin;
