@@ -184,7 +184,10 @@ namespace ARTHS_Service.Implementations
 
             if (booking.Status.Equals(RepairBookingStatus.Confirmed))
             {
-                await SendNotificationBookingToStaff(booking);
+                if(booking.StaffId!= null)
+                {
+                    await SendNotificationBookingToStaff(booking);
+                }
             }
             _repairBookingRepository.Update(booking);
             var result = await _unitOfWork.SaveChanges();

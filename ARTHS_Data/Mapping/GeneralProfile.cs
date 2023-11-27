@@ -96,7 +96,7 @@ namespace ARTHS_Data.Mapping
             CreateMap<Configuration, ConfigurationViewModel>();
             CreateMap<Discount, BasicDiscountViewModel>();
             CreateMap<FeedbackStaff, FeedbackStaffViewModel>();
-
+            CreateMap<MaintenanceSchedule, MaintenanceScheduleViewModel>();
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();

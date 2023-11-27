@@ -39,7 +39,7 @@ namespace ARTHS_Service.Implementations
             if (order == null) throw new NotFoundException("Không tìm thấy thông tin order");
             if (order.Status.Equals(OrderStatus.Paid)) throw new BadRequestException("Đơn hàng này đã thanh toán thành công rồi");
             var existRevenues = await _revenueStoreRepository.GetMany(revenue => revenue.OrderId!.Equals(orderId)).ToListAsync();
-            if(existRevenues != null)
+            if(existRevenues != null && existRevenues.Count > 0)
             {
                 _revenueStoreRepository.RemoveRange(existRevenues);
             }
@@ -98,7 +98,7 @@ namespace ARTHS_Service.Implementations
             string AppTransId = now.ToString("yyMMddHHmmssfff") + "_" + model.OrderId;
 
             var existRevenues = await _revenueStoreRepository.GetMany(revenue => revenue.OrderId!.Equals(order.Id)).ToListAsync();
-            if (existRevenues != null)
+            if (existRevenues != null && existRevenues.Count > 0)
             {
                 _revenueStoreRepository.RemoveRange(existRevenues);
             }

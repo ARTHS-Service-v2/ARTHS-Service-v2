@@ -62,6 +62,13 @@ namespace ARTHS_Service.Implementations
             } : null!;
         }
 
+        public async Task<List<string?>> GetDeviceToken(Guid accountId)
+        {
+            return await _deviceTokenRepository.GetMany(token => token.AccountId.Equals(accountId))
+                .Select(token => token.Token)
+                .ToListAsync();
+        }
+
         public async Task<bool> SendNotification(ICollection<Guid> accountIds, CreateNotificationModel model)
         {
             var deviceTokens = await _deviceTokenRepository.GetMany(token => accountIds.Contains(token.AccountId))

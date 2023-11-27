@@ -194,9 +194,10 @@ namespace ARTHS_Service.Implementations
             {
                 await SendNotificationConfirmToCustomer(order);
             }
+
             if (ShouldCreateTransaction(order.PaymentMethod!, order.Status))
             {
-                CreateTransaction(order);
+                await CreateTransaction(order);
             }
 
             _orderRepository.Update(order);
@@ -303,7 +304,7 @@ namespace ARTHS_Service.Implementations
 
                 if (model.Status.Equals(OrderStatus.Paid))
                 {
-                    CreateTransaction(order);
+                    await CreateTransaction(order);
                     order.PaymentMethod = PaymentMethods.COD;
                 }
                 order.Status = model.Status;
@@ -357,8 +358,13 @@ namespace ARTHS_Service.Implementations
                 .ToListAsync();
             await _notificationService.SendNotification(tellers, message);
         }
-        private void CreateTransaction(Order order)
+        private async Task CreateTransaction(Order order)
         {
+            var existRevenues = await _revenueStoreRepository.GetMany(revenue => revenue.OrderId!.Equals(order.Id)).ToListAsync();
+            if (existRevenues != null)
+            {
+                _revenueStoreRepository.RemoveRange(existRevenues);
+            }
             var revenue = new RevenueStore
             {
                 Id = DateTime.UtcNow.AddHours(7).ToString("yyMMdd") + "_" + order.Id,
