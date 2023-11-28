@@ -76,8 +76,8 @@ namespace ARTHS_Service.Implementations
 
 
                 // Lưu tệp PDF vào Blob Storage
-                var blobServiceClient = new BlobServiceClient("DefaultEndpointsProtocol=https;AccountName=arthsstoragev1;AccountKey=NTLe0PSFGUdg2IaZCyhKk/zqT+C4Unw8utbFWT2Rr5I4Gwz3mJtcaLPrshM5MeLufBRO4rYO5u7O+AStR3kOiQ==;EndpointSuffix=core.windows.net"); // Thay thế bằng Connection String thực tế
-                var containerClient = blobServiceClient.GetBlobContainerClient("arths-bill");
+                var blobServiceClient = new BlobServiceClient("DefaultEndpointsProtocol=https;AccountName=arthsbillstoragev2;AccountKey=JSzefye9lskpFZ25QFkJMZiC71TLowm+EpRcEA9wPIW2kXXhIsGDUeFF3OXIN3v0Sds9L5SpAYv6+ASt4ZaHYA==;EndpointSuffix=core.windows.net"); // Thay thế bằng Connection String thực tế
+                var containerClient = blobServiceClient.GetBlobContainerClient("arthsbill");
                 var blobClient = containerClient.GetBlobClient($"{orderId}.pdf");
 
                 await using (var ms = new MemoryStream())

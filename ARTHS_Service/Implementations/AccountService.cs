@@ -27,7 +27,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task<ListViewModel<AccountViewModel>> GetAccounts(AccountFilterModel filter, PaginationRequestModel pagination)
         {
-            var query = _accountRepository.GetAll();
+            var query = _accountRepository.GetAll().Where(account => account.Role.RoleName != UserRole.Admin);
             if (!string.IsNullOrEmpty(filter.FullName))
             {
                 query = query.Where(account => (account.CustomerAccount != null && account.CustomerAccount.FullName.Contains(filter.FullName)) ||
