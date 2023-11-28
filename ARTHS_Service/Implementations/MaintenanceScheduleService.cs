@@ -1,9 +1,12 @@
 ﻿using ARTHS_Data;
+using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Get;
+using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Enums;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +16,13 @@ namespace ARTHS_Service.Implementations
     public class MaintenanceScheduleService : BaseService, IMaintenanceScheduleSerivce
     {
         private readonly IMaintenanceScheduleRepository _maintenanceScheduleRepository;
-        public MaintenanceScheduleService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        private readonly IOrderDetailRepository _orderDetailRepository;
+        private readonly INotificationService _notificationService;
+        public MaintenanceScheduleService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService) : base(unitOfWork, mapper)
         {
             _maintenanceScheduleRepository = unitOfWork.MaintenanceSchedule;
+            _orderDetailRepository = unitOfWork.OrderDetail;
+            _notificationService = notificationService;
         }
 
         public async Task<ListViewModel<MaintenanceScheduleViewModel>> GetMainTenanceSchedules(MaintenanceScheduleFilterModel filter, PaginationRequestModel pagination)
@@ -47,6 +54,46 @@ namespace ARTHS_Service.Implementations
                 },
                 Data = schedules
             };
+        }
+
+        public async Task<bool> SendMaintenanceReminders(Guid maintenanceScheduleId)
+        {
+            var maintenanceSchedules = await _maintenanceScheduleRepository
+                .GetMany(m => m.Id.Equals(maintenanceScheduleId) && !m.RemiderSend)
+                .FirstOrDefaultAsync();
+
+            if (maintenanceSchedules == null) return false;
+
+            
+                await SendNotificationToCustomer(maintenanceSchedules);
+                maintenanceSchedules.RemiderSend = true;
+            
+
+            _maintenanceScheduleRepository.Update(maintenanceSchedules);
+            return await _unitOfWork.SaveChanges() > 0 ? true : false;
+        }
+
+        private async Task SendNotificationToCustomer(MaintenanceSchedule schedule)
+        {
+            var detail = await _orderDetailRepository.GetMany(detail => detail.Id.Equals(schedule.OrderDetailId))
+                .Include(detail => detail.RepairService)
+                .FirstOrDefaultAsync();
+
+            var message = new CreateNotificationModel
+            {
+                Title = $"Nhắc nhở sắp đến lịch bảo trì tiếp theo.",
+                Body = $"Bạn đã sử dụng dịch vụ bảo trì bảo dưỡng {detail!.RepairService!.Name} " +
+                $"bên chúng tôi và đã sắp đến hạn bảo dưỡng lần tiếp theo vào ngày {schedule.NextMaintenanceDate.ToString("ddMMyyy")}. " +
+                $"Để đảm bảo được tình trạng xe tốt nhất bạn nên đặt lịch sửa bảo trì lần tiếp theo hoặc có thể đem xe đến để chúng tôi có thể chăm sóc tốt cho xe của bạn.",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    Type = NotificationType.RepairService.ToString(),
+                    Link = detail.Id.ToString()
+                }
+            };
+            //var staffId = await _accountRepository.GetMany(account => account.Id.Equals(order.StaffId)).Select(account => account.Id).FirstOrDefaultAsync();
+            await _notificationService.SendNotification(new List<Guid> { schedule.CustomerId }, message);
         }
     }
 }

@@ -81,18 +81,18 @@ namespace ARTHS_Service.Implementations
                 InsuranceValue = order.TotalAmount,
                 Items = items
             };
-            var resutl = await GhnHelper.CreateShippingOrderAsync(requestData);
-            if (resutl != null)
+            var ghnResult = await GhnHelper.CreateShippingOrderAsync(requestData);
+            if (ghnResult != null)
             {
                 order.Status = OrderStatus.Transport;
-                order.ShippingCode = resutl.OrderCode;
+                order.ShippingCode = ghnResult.OrderCode;
                 _orderRepository.Update(order);
-
+                var result = await _unitOfWork.SaveChanges();
                 await SendNotificationTransportToCustomer(order);
 
-                var save = await _unitOfWork.SaveChanges();
+                
 
-                return save > 0 ? resutl : throw new BadRequestException("Lỗi khi update trạng thái đơn");
+                return result > 0 ? ghnResult : throw new BadRequestException("Lỗi khi update trạng thái đơn");
 
             }
             throw new BadRequestException("Vui lòng kiểm tra lại các thông tin như SĐT, địa chỉ");

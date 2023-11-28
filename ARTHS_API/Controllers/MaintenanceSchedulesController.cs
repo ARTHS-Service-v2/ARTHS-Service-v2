@@ -23,5 +23,20 @@ namespace ARTHS_API.Controllers
         {
             return await _maintenanceScheduleSerivce.GetMainTenanceSchedules(filter, pagination);
         }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        public async Task<ActionResult<string>> SendMaintenanceReminders([FromQuery] Guid maintenanceSheduleId)
+        {
+            var result = await _maintenanceScheduleSerivce.SendMaintenanceReminders(maintenanceSheduleId);
+            if (result)
+            {
+                return "Send thành công";
+            }
+            else
+            {
+                return "Thất bại";
+            }
+        }
     }
 }

@@ -26,7 +26,7 @@ namespace ARTHS_Service.Implementations
             
             if (year.HasValue)
             {
-                query = query.Where(revenue => revenue.TransactionDate.Year.Equals(year));
+                query = query.Where(revenue => revenue.TransactionDate.Year.Equals(year) && revenue.Status.Equals("Thành công"));
             }
 
             return await query
