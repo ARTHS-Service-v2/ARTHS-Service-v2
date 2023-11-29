@@ -1,6 +1,7 @@
 ﻿using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Views;
 using AutoMapper;
+using ARTHS_Utility.Constants;
 
 namespace ARTHS_Data.Mapping
 {
@@ -89,9 +90,11 @@ namespace ARTHS_Data.Mapping
             CreateMap<Order, BasicOrderViewModel>();
             CreateMap<OrderDetail, OrderDetailViewModel>();
             CreateMap<RevenueStore, RevenueStoreViewModel>()
-                .ForMember(dest => dest.OrderType, otp => otp.MapFrom(src =>src.Order!.OrderType));
-            CreateMap<RevenueStore, StaticsViewModel>()
                 .ForMember(dest => dest.OrderType, otp => otp.MapFrom(src => src.Order!.OrderType));
+                
+            CreateMap<RevenueStore, StaticsViewModel>()
+                .ForMember(dest => dest.OrderType, otp => otp.MapFrom(src => src.Order!.OrderType))
+                .ForMember(dest => dest.IsOrder, otp => otp.MapFrom(src => src.Order!.StaffId != null ? OrderTypes.Repair : OrderTypes.Purchase));
             CreateMap<WarrantyHistory, WarrantyHistoryViewModel>();
             CreateMap<Configuration, ConfigurationViewModel>();
             CreateMap<Discount, BasicDiscountViewModel>();

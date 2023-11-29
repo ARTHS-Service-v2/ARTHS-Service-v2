@@ -174,6 +174,10 @@ namespace ARTHS_Service.Implementations
             {
                 throw new NotFoundException("Không tìm thấy order");
             }
+            if (order.Status.Equals(OrderStatus.Finished))
+            {
+                throw new BadRequestException("Đơn đã hoàn thành không thể chỉnh sữa");
+            }
             if (model.Status.Equals(OrderStatus.Canceled) && order.Status != OrderStatus.Processing)
             {
                 throw new ConflictException("Không thể hủy đơn hàng này");
@@ -325,7 +329,6 @@ namespace ARTHS_Service.Implementations
 
             _orderRepository.Update(order);
             return await _unitOfWork.SaveChanges() > 0 ? await GetOrder(Id) : null!;
-
         }
 
 
@@ -370,7 +373,7 @@ namespace ARTHS_Service.Implementations
                 Id = DateTime.UtcNow.AddHours(7).ToString("yyMMdd") + "_" + order.Id,
                 OrderId = order.Id,
                 TotalAmount = order.TotalAmount,
-                Type = "Thanh toán hóa đơn mua hàng online của cửa hàng Thanh Huy",
+                Type = "Thanh toán hóa đơn mua hàng - sửa chữa của cửa hàng Thanh Huy",
                 PaymentMethod = PaymentMethods.COD,
                 Status = "Thành công"
             };
@@ -452,15 +455,16 @@ namespace ARTHS_Service.Implementations
                     orderDetail.Quantity = detail.ProductQuantity.GetValueOrDefault(1);
 
                     //tính phí thay thế + bảo hảnh
-                    var warrantyEndDate = DateTime.UtcNow.AddHours(7);
+                    //var warrantyEndDate = DateTime.UtcNow.AddHours(7);
                     if (detail.InstUsed.GetValueOrDefault(false))
                     {
                         orderDetail.InstUsed = detail.InstUsed.GetValueOrDefault(true);
                         detailPrice += product.InstallationFee;
-                        warrantyEndDate = product.Warranty != null ? DateTime.UtcNow.AddMonths(product.Warranty.Duration) : warrantyEndDate;
+
+                        orderDetail.WarrantyEndDate = product.Warranty != null ? DateTime.UtcNow.AddMonths(product.Warranty.Duration) : null;
                     }
 
-                    orderDetail.WarrantyEndDate = warrantyEndDate;
+                   
                 }
                 else if (detail.RepairServiceId.HasValue)
                 {
