@@ -10,7 +10,6 @@
         public string Status { get; set; } = null!;
         public DateTime? UpdateAt { get; set; }
         public DateTime TransactionDate { get; set; }
-
         public string OrderType { get; set; } = null!;
     }
 }

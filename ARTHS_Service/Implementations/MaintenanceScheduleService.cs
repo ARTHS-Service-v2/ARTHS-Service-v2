@@ -83,7 +83,7 @@ namespace ARTHS_Service.Implementations
             {
                 Title = $"Nhắc nhở sắp đến lịch bảo trì tiếp theo.",
                 Body = $"Bạn đã sử dụng dịch vụ bảo trì bảo dưỡng {detail!.RepairService!.Name} " +
-                $"bên chúng tôi và đã sắp đến hạn bảo dưỡng lần tiếp theo vào ngày {schedule.NextMaintenanceDate.ToString("ddMMyyy")}. " +
+                $"bên chúng tôi và đã sắp đến hạn bảo dưỡng lần tiếp theo vào ngày {schedule.NextMaintenanceDate.ToString("dd-MM-yyyy")}. " +
                 $"Để đảm bảo được tình trạng xe tốt nhất bạn nên đặt lịch sửa bảo trì lần tiếp theo hoặc có thể đem xe đến để chúng tôi có thể chăm sóc tốt cho xe của bạn.",
                 Data = new NotificationDataViewModel
                 {
