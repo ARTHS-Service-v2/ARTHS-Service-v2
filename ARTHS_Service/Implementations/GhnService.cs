@@ -104,6 +104,8 @@ namespace ARTHS_Service.Implementations
             if (model.Status!.Equals("delivered"))
             {
                 var order = await _orderRepository.GetMany(order => order.ShippingCode != null && order.ShippingCode.Equals(model.OrderCode)).FirstOrDefaultAsync();
+                if (order!.Status.Equals(OrderStatus.Finished)) return;
+
                 order!.Status = OrderStatus.Finished;
                 _orderRepository.Update(order);
 

@@ -82,6 +82,10 @@ namespace ARTHS_Service.Implementations
             {
                 baseQuery = baseQuery.Where(product => product.Status.Contains(filter.Status));
             }
+            if (!string.IsNullOrEmpty(filter.ExcludeStatus))
+            {
+                baseQuery = baseQuery.Where(product => !product.Status.Contains(filter.ExcludeStatus));
+            }
 
             // Sorting logic
             if (filter.SortByNameAsc.HasValue)
@@ -199,33 +203,13 @@ namespace ARTHS_Service.Implementations
                 throw new NotFoundException("Không tìm thấy product.");
             }
 
-            //if (model.Images != null && model.Images.Count > 0)
-            //{
-            //    if (model.Images.Count > 4)
-            //    {
-            //        throw new BadRequestException("Chỉ được chứa bốn hình ảnh.");
-            //    }
-
-            //    foreach (IFormFile image in model.Images)
-            //    {
-            //        if (!image.ContentType.StartsWith("image/"))
-            //        {
-            //            throw new BadRequestException("File không phải là hình ảnh");
-            //        }
-            //    }
-
-            //    await UpdateMotobikeProductImage(id, model.Images);
-            //}
-
             motobikeProduct.PriceCurrent = model.PriceCurrent ?? motobikeProduct.PriceCurrent;
-
             if (model.PriceCurrent != null)
             {
                 CreateMotobikeProductPrice(id, (int)model.PriceCurrent);
             }
-
+           
             motobikeProduct.Name = model.Name ?? motobikeProduct.Name;
-            motobikeProduct.Quantity = model.Quantity ?? motobikeProduct.Quantity;
             motobikeProduct.Description = model.Description ?? motobikeProduct.Description;
             motobikeProduct.Status = model.Status ?? motobikeProduct.Status;
             motobikeProduct.DiscountId = model.DiscountId ?? motobikeProduct.DiscountId;
@@ -233,6 +217,20 @@ namespace ARTHS_Service.Implementations
             motobikeProduct.CategoryId = model.CategoryId ?? motobikeProduct.CategoryId;
             motobikeProduct.InstallationFee = model.InstallationFee ?? motobikeProduct.InstallationFee;
             motobikeProduct.UpdateAt = DateTime.Now;
+
+            //motobikeProduct.Quantity = model.Quantity ?? motobikeProduct.Quantity;
+            if (model.Quantity.HasValue)
+            {
+                motobikeProduct.Quantity = model.Quantity.Value;
+                if (motobikeProduct.Quantity.Equals(0) && !motobikeProduct.Status.Equals(ProductStatus.Discontinued))
+                {
+                    motobikeProduct.Status = ProductStatus.OutOfStock;
+                }
+                else if(!motobikeProduct.Status.Equals(ProductStatus.Discontinued))
+                {
+                    motobikeProduct.Status = ProductStatus.Active;
+                }
+            }
 
             if (model.VehiclesId != null && model.VehiclesId.Count > 0)
             {
@@ -243,7 +241,6 @@ namespace ARTHS_Service.Implementations
                 }
 
                 motobikeProduct.Vehicles.Clear();
-                Console.Write(motobikeProduct.Vehicles);
                 motobikeProduct.Vehicles = vehicles;
             }
 

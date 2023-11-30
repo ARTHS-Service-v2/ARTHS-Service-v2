@@ -5,7 +5,6 @@ using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
-using ARTHS_Data.Repositories.Implementations;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
@@ -169,7 +168,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task<OrderViewModel> UpdateOrderOnline(string Id, UpdateOrderOnlineModel model)
         {
-            var order = await _orderRepository.GetMany(order => order.Id.Equals(Id)).FirstOrDefaultAsync();
+            var order = await _orderRepository.GetMany(order => order.Id.Equals(Id)).Include(order => order.OrderDetails).FirstOrDefaultAsync();
             if (order == null)
             {
                 throw new NotFoundException("Không tìm thấy order");
@@ -190,6 +189,7 @@ namespace ARTHS_Service.Implementations
             {
                 order.CancellationReason = model.CancellationReason;
                 order.CancellationDate = DateTime.UtcNow;
+                await UpdateProductQuantity(order.OrderDetails);
             }
 
             order.Status = model.Status ?? order.Status;
@@ -209,6 +209,7 @@ namespace ARTHS_Service.Implementations
             return result > 0 ? await GetOrder(Id) : null!;
         }
 
+        
 
         public async Task<OrderViewModel> CreateOrderOffline(Guid tellerId, CreateOrderOfflineModel model)
         {
@@ -332,9 +333,23 @@ namespace ARTHS_Service.Implementations
         }
 
 
-        
+
 
         //PRIVATE
+        private async Task UpdateProductQuantity(ICollection<OrderDetail> orderDetails)
+        {
+            foreach (var detail in orderDetails)
+            {
+                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(detail.MotobikeProductId)).FirstOrDefaultAsync();
+                product!.Quantity += detail.Quantity;
+                if (!product.Status.Equals(ProductStatus.Discontinued) && product.Status.Equals(ProductStatus.OutOfStock))
+                {
+                    product.Status = ProductStatus.Active;
+                }
+                _motobikeProductRepository.Update(product);
+            }
+        }
+
         private async Task ChangeStatusOfStaff(Guid? staffId)
         {
             var staff = await _accountRepository.GetMany(staff => staff.Id.Equals(staffId)).FirstOrDefaultAsync();
@@ -468,8 +483,7 @@ namespace ARTHS_Service.Implementations
                 }
                 else if (detail.RepairServiceId.HasValue)
                 {
-                    var repairService = await _repairServiceRepository.GetMany(service => service.Id.Equals(detail.RepairServiceId)).FirstOrDefaultAsync();
-                    if (repairService == null) throw new NotFoundException($"Không tìm thấy dịch vụ {detail.RepairServiceId}");
+                    var repairService = await _repairServiceRepository.GetMany(service => service.Id.Equals(detail.RepairServiceId)).FirstOrDefaultAsync() ?? throw new NotFoundException($"Không tìm thấy dịch vụ {detail.RepairServiceId}");
                     
                     int servicePrice = repairService.Price;
                     if(repairService.Discount != null)
@@ -481,11 +495,6 @@ namespace ARTHS_Service.Implementations
                     orderDetail.Price = servicePrice;
 
                     orderDetail.WarrantyEndDate = repairService.WarrantyDuration == 0 ? null : DateTime.UtcNow.AddHours(7).AddMonths(repairService.WarrantyDuration);
-                    
-                    //if (repairService.ReminderInterval.HasValue)
-                    //{
-                    //    CreateMaintenanceSchedule(orderDetail.Id, (int)repairService.ReminderInterval);
-                    //}
                 }
 
                 orderDetail.SubTotalAmount = detailPrice;
@@ -544,7 +553,6 @@ namespace ARTHS_Service.Implementations
             int totalPrice = 0;
             foreach (var detail in listDetail)
             {
-
                 int detailPrice = 0;
                 var orderDetail = new OrderDetail
                 {
@@ -557,8 +565,15 @@ namespace ARTHS_Service.Implementations
                 var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(detail.MotobikeProductId))
                     .Include(product => product.Discount)
                     .Include(product => product.Warranty)
-                    .FirstOrDefaultAsync();
-                if (product == null) throw new NotFoundException($"Không tìm thấy sản phẩm {detail.MotobikeProductId}");
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException($"Không tìm thấy sản phẩm {detail.MotobikeProductId}");
+                if(product.Status.Equals(ProductStatus.Discontinued)) throw new ConflictException($"Sản phẩm {product.Name} hiện tại đã ngừng kinh doanh. Cửa hàng xin lỗi về sự bất tiện này.");
+                if (product.Quantity < detail.ProductQuantity) throw new ConflictException($"Sản phẩm {product.Name} hiện tại chỉ còn {product.Quantity} sản phẩm, vui lòng điều chỉnh lại số lượng. Cửa hàng xin lỗi về sự bất tiện này.");
+                product.Quantity -= detail.ProductQuantity;
+                if (product.Quantity.Equals(0))
+                {
+                    product.Status = ProductStatus.OutOfStock;
+                }
+                _motobikeProductRepository.Update(product);
 
                 //áp dụng giảm giá
                 int productPrice = product.PriceCurrent;
@@ -578,6 +593,7 @@ namespace ARTHS_Service.Implementations
             }
             return totalPrice;
         }
+
 
         private static string GenerateOrderId()
         {

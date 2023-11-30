@@ -8,6 +8,7 @@
         public Guid? DiscountId { get; set; }
         public bool? HaveDiscount { get; set; }
         public string? Status { get; set; }
+        public string? ExcludeStatus { get; set; }
         public bool? SortByNameAsc { get; set; }
         public bool? SortByPriceAsc { get; set; }
 

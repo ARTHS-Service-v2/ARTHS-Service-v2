@@ -104,6 +104,9 @@ namespace ARTHS_Service.Implementations
             {
                 throw new ConflictException("Vui lòng nhập đúng định dạng ngày (yyyy-MM-dd).");
             }
+
+            await CheckCustomerBooking(customerId, dateBook);
+            
             if (model.StaffId.HasValue)
             {
                 if (!await IsStaffAvailableForBooking(model.StaffId.Value, dateBook))
@@ -129,6 +132,15 @@ namespace ARTHS_Service.Implementations
             _repairBookingRepository.Add(booking);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetRepairBooking(booking.Id) : null!;
+        }
+
+        private async Task CheckCustomerBooking(Guid customerId, DateTime dateBook)
+        {
+            var booking = await _repairBookingRepository.GetMany(booking =>
+                                booking.CustomerId.Equals(customerId) &&
+                                booking.DateBook.Date.Equals(dateBook.Date))
+                .FirstOrDefaultAsync();
+            if (booking != null) throw new BadRequestException($"Bạn đã có lịch hẹn cho ngày {dateBook.ToString("dd-MM-yyyy")}.");
         }
 
         public async Task<RepairBookingViewModel> UpdateBooking(Guid repairBookingId, UpdateRepairBookingModel model)

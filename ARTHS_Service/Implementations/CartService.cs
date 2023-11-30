@@ -68,7 +68,6 @@ namespace ARTHS_Service.Implementations
                 }
             };
             return result > 0 ? await GetCartByCustomerId(customerId) : null!;
-
         }
 
 
@@ -108,7 +107,6 @@ namespace ARTHS_Service.Implementations
             return result > 0 ? await GetCartByCustomerId(cart.CustomerId) : null!;
         }
 
-        
 
         private async Task HandleAddCartItem(Guid cartId, CreateCartModel model)
         {

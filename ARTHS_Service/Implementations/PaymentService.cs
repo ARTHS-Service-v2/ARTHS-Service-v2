@@ -20,10 +20,6 @@ namespace ARTHS_Service.Implementations
         private readonly IRevenueStoreRepository _revenueStoreRepository;
         private readonly AppSetting _appSettings;
 
-        private const string CREATE_ORDER_URL = "https://sb-openapi.zalopay.vn/v2/create";
-        private const string QUERY_ORDER_URL = "https://sb-openapi.zalopay.vn/v2/query";
-        private const string CallBack_URL = "https://thanh-huy.azurewebsites.net/api/payments/zalopay-callback";
-
         public PaymentService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings) : base(unitOfWork, mapper)
         {
             _orderRepository = unitOfWork.Order;
@@ -47,7 +43,7 @@ namespace ARTHS_Service.Implementations
             {
                 OrderId = orderId,
                 TotalAmount = model.Amount,
-                Type = "Thanh toán hóa đơn cửa hàng Thanh Huy",
+                Type = "Thanh toán hóa đơn của cửa hàng.",
                 PaymentMethod = PaymentMethods.VNPay,
                 Status = "Đang xử lý",
                 Id = model.TxnRef
@@ -61,7 +57,7 @@ namespace ARTHS_Service.Implementations
             var revenue = await _revenueStoreRepository.GetMany(transaction => transaction.Id.Equals(model.TxnRef)).FirstOrDefaultAsync();
             if (revenue == null) throw new NotFoundException("Không tìm thấy thông tin của revenue");
             var order = await _orderRepository.GetMany(order => order.Id.Equals(revenue.OrderId)).FirstOrDefaultAsync();
-            if (order == null) return false;
+            if (order == null || !order.Status.Equals(OrderStatus.Processing)) return false;
             if (model.ResponseCode == "00")
             {
                 order.Status = OrderStatus.Paid;
@@ -117,10 +113,9 @@ namespace ARTHS_Service.Implementations
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             long unixTime = (long)(DateTime.UtcNow - epoch).TotalMilliseconds;
 
-
             var param = new Dictionary<string, string>
                 {
-                { "app_id", _appSettings.AppId.ToString() },
+                { "app_id", _appSettings.ZaloPayAppId.ToString() },
                 { "app_user", order.CustomerPhoneNumber },
                 { "app_time", unixTime.ToString() },
                 { "amount", order.TotalAmount.ToString() },
@@ -129,22 +124,19 @@ namespace ARTHS_Service.Implementations
                 { "item", JsonConvert.SerializeObject(items) },
                 { "description", $"ThanhHuy - Thanh toán đơn hàng #{model.OrderId}" },
                 { "bank_code", "zalopayapp" },
-                {"callback_url", CallBack_URL }
+                { "callback_url", _appSettings.CallbackUrl }
                 };
 
-            //https://localhost:7235/api/payments/zalopay-callback
-            var data = string.Join("|", _appSettings.AppId, param["app_trans_id"], param["app_user"], param["amount"],
+            var data = string.Join("|", _appSettings.ZaloPayAppId, param["app_trans_id"], param["app_user"], param["amount"],
                                     param["app_time"], param["embed_data"], param["item"]);
-
-            param.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, _appSettings.Key1, data));
+            param.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, _appSettings.ZaloPayKey1, data));
             //Console.WriteLine(JsonConvert.SerializeObject(param, Formatting.Indented));
-            var result = await HttpHelper.PostFormAsync(CREATE_ORDER_URL, param);
+            var result = await HttpHelper.PostFormAsync(_appSettings.CreateOrderUrl, param);
             return result;
         }
 
         public async Task<dynamic> IsValidCallback(dynamic cbdata)
         {
-            string key2 = _appSettings.Key2;
             var result = new Dictionary<string, object>();
 
             try
@@ -158,7 +150,7 @@ namespace ARTHS_Service.Implementations
                 var dataJson = JsonConvert.DeserializeObject<dynamic>(dataStr);
                 var appTransId = Convert.ToString(dataJson["app_trans_id"]);
 
-                var mac = HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, key2, dataStr);
+                var mac = HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, _appSettings.ZaloPayKey2, dataStr);
 
                 Console.WriteLine("mac = {0}", mac);
 
@@ -166,7 +158,6 @@ namespace ARTHS_Service.Implementations
                 if (!reqMac.Equals(mac))
                 {
                     Console.WriteLine("Lỗi");
-
                     // callback không hợp lệ
                     result["return_code"] = -1;
                     result["return_message"] = "mac not equal";
@@ -188,11 +179,6 @@ namespace ARTHS_Service.Implementations
                     revenue.UpdateAt = DateTime.UtcNow;
                     _revenueStoreRepository.Update(revenue);
                     await _unitOfWork.SaveChanges();
-
-                    // thanh toán thành công
-                    // merchant cập nhật trạng thái cho đơn hàng
-                    //var dataJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataStr);
-                    //Console.WriteLine("update order's status = success where app_trans_id = {0}", dataJson["app_trans_id"]);
 
                     result["return_code"] = 1;
                     result["return_message"] = "success";

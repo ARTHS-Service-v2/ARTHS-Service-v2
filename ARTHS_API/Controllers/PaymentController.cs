@@ -69,8 +69,9 @@ namespace ARTHS_API.Controllers
             }
 
             var model = VnPayHelper.ParseToResponseModel(queryParams);
-            var result = await _paymentService.ConfirmVnPayPayment(model);
-            return result ? Ok() : BadRequest();
+            await _paymentService.ConfirmVnPayPayment(model);
+
+            return Ok();
         }
 
         [HttpGet]
