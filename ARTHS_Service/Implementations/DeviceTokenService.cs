@@ -5,11 +5,6 @@ using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ARTHS_Service.Implementations
 {

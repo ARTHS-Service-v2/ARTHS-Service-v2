@@ -8,7 +8,6 @@ using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using PdfSharp.Pdf.Filters;
 
 namespace ARTHS_Service.Implementations
 {

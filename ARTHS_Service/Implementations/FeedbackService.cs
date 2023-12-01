@@ -65,6 +65,15 @@ namespace ARTHS_Service.Implementations
             return await _unitOfWork.SaveChanges() > 0 ? await GetFeedbackStaff(feedbackId) : null!;
         }
 
+        public async Task<FeedbackStaffViewModel> UpdateFeedbackStaff(Guid id, UpdateFeedbackStaffModel model)
+        {
+            var feedback = await _feedbackStaffRepository.GetMany(feedback => feedback.Id.Equals(id)).FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy feedback");
+            feedback.Content = model.Content ?? feedback.Content;
+            _feedbackStaffRepository.Update(feedback);
+            var result = await _unitOfWork.SaveChanges();
+            return result > 0 ? await GetFeedbackStaff(id) : null!;
+        }
+
         public async Task<FeedbackProductViewModel> CreateProductFeedback(Guid customerId, CreateFeedbackProductModel model)
         {
             var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(model.MotobikeProductId))

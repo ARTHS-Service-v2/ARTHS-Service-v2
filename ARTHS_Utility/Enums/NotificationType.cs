@@ -2,7 +2,9 @@
 {
     public enum NotificationType
     {
+        Purchase,
         RepairService,
-
+        MaintanenceSchedule,
+        Booking,
     }
 }

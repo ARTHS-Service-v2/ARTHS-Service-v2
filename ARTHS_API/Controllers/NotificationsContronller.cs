@@ -1,21 +1,15 @@
-﻿using ARTHS_Data.Entities;
-using ARTHS_Data.Models.Requests.Post;
-using FirebaseAdmin.Messaging;
+﻿using ARTHS_API.Configurations.Middleware;
+using ARTHS_Data.Models.Internal;
+using ARTHS_Data.Models.Requests.Get;
+using ARTHS_Data.Models.Requests.Put;
+using ARTHS_Data.Models.Views;
+using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Constants;
 using FirebaseAdmin;
+using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using ARTHS_Service.Interfaces;
-using ARTHS_Data.Models.Views;
-using ARTHS_API.Configurations.Middleware;
-using ARTHS_Utility.Constants;
 using Swashbuckle.AspNetCore.Annotations;
-using ARTHS_Data.Models.Requests.Get;
-using ARTHS_Data.Models.Internal;
-using ARTHS_Data.Models.Requests.Put;
-using ARTHS_Data.Repositories.Interfaces;
-using ARTHS_Data;
 
 namespace ARTHS_API.Controllers
 {
@@ -61,6 +55,16 @@ namespace ARTHS_API.Controllers
         {
             var notification = await _notificationService.UpdateNotification(Id, model);
             return CreatedAtAction(nameof(GetNotification), new { id = notification.Id }, notification);
+        }
+
+        [HttpPut]
+        [Route("mark-as-read/{accountId}")]
+        [ProducesResponseType(typeof(NotificationViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Mark as read all notification.")]
+        public async Task<IActionResult> MarkAsReadNotification([FromRoute] Guid accountId)
+        {
+            var notification = await _notificationService.MakeAsRead(accountId);
+            return Ok(notification);
         }
 
         [HttpDelete]

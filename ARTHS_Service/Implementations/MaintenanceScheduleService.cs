@@ -88,7 +88,7 @@ namespace ARTHS_Service.Implementations
                 Data = new NotificationDataViewModel
                 {
                     CreateAt = DateTime.UtcNow.AddHours(7),
-                    Type = NotificationType.RepairService.ToString(),
+                    Type = NotificationType.MaintanenceSchedule.ToString(),
                     Link = detail.Id.ToString()
                 }
             };

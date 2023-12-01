@@ -168,11 +168,10 @@ namespace ARTHS_Service.Implementations
 
         public async Task<OrderViewModel> UpdateOrderOnline(string Id, UpdateOrderOnlineModel model)
         {
-            var order = await _orderRepository.GetMany(order => order.Id.Equals(Id)).Include(order => order.OrderDetails).FirstOrDefaultAsync();
-            if (order == null)
-            {
-                throw new NotFoundException("Không tìm thấy order");
-            }
+            var order = await _orderRepository.GetMany(order => order.Id.Equals(Id))
+                .Include(order => order.OrderDetails)
+                    .ThenInclude(detail => detail.MotobikeProduct)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy order");
             if (order.Status.Equals(OrderStatus.Finished))
             {
                 throw new BadRequestException("Đơn đã hoàn thành không thể chỉnh sữa");
@@ -243,8 +242,7 @@ namespace ARTHS_Service.Implementations
                     if (ShouldAddStaffToOrder(model.OrderDetailModel))
                     {
                         if (!model.StaffId.HasValue) throw new BadRequestException("Vui lòng chọn nhân viên");
-                        var staff = await _accountRepository.GetMany(staff => staff.Id.Equals(model.StaffId)).FirstOrDefaultAsync();
-                        if (staff == null) throw new NotFoundException("Không tìm thấy nhân viên");
+                        var staff = await _accountRepository.GetMany(staff => staff.Id.Equals(model.StaffId)).FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy nhân viên");
                         if (staff.Status.Equals(UserStatus.Busy)) throw new ConflictException("Nhân viên đang bận vui lòng chọn nhân viên khác");
                         order.StaffId = model.StaffId;
                         staff.Status = UserStatus.Busy;
@@ -255,8 +253,7 @@ namespace ARTHS_Service.Implementations
                         if (model.BookingId.HasValue)
                         {
                             var booking = await _repairBookingRepository.GetMany(booking => booking.Id.Equals(model.BookingId.Value))
-                                .FirstOrDefaultAsync();
-                            if (booking == null) throw new NotFoundException($"Không tìm thấy booking {model.BookingId}");
+                                .FirstOrDefaultAsync() ?? throw new NotFoundException($"Không tìm thấy booking {model.BookingId}");
                             booking.OrderId = orderId;
                             _repairBookingRepository.Update(booking);
 
@@ -285,11 +282,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task<OrderViewModel> UpdateOrderOffline(string Id, UpdateInStoreOrderModel model)
         {
-            var order = await _orderRepository.GetMany(order => order.Id.Equals(Id)).FirstOrDefaultAsync();
-            if (order == null)
-            {
-                throw new NotFoundException("Không tìm thấy order.");
-            }
+            var order = await _orderRepository.GetMany(order => order.Id.Equals(Id)).FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy order.");
             if (order.Status.Equals(OrderStatus.Finished))
             {
                 throw new BadRequestException("Đơn đã hoàn thành không thể chỉnh sữa");
@@ -338,7 +331,7 @@ namespace ARTHS_Service.Implementations
         //PRIVATE
         private async Task UpdateProductQuantity(ICollection<OrderDetail> orderDetails)
         {
-            foreach (var detail in orderDetails)
+            foreach (var detail in orderDetails.Where(detail => detail.MotobikeProduct != null))
             {
                 var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(detail.MotobikeProductId)).FirstOrDefaultAsync();
                 product!.Quantity += detail.Quantity;
@@ -432,7 +425,10 @@ namespace ARTHS_Service.Implementations
             }
             if (isUpdate)
             {
-                var existOrderDetail = await _orderDetailRepository.GetMany(detail => detail.OrderId.Equals(orderId)).ToListAsync();
+                var existOrderDetail = await _orderDetailRepository.GetMany(detail => detail.OrderId.Equals(orderId))
+                    .Include(detail => detail.MotobikeProduct)
+                    .ToListAsync();
+                await UpdateProductQuantity(existOrderDetail);
                 _orderDetailRepository.RemoveRange(existOrderDetail);
             }
             int totalPrice = 0;
@@ -455,8 +451,14 @@ namespace ARTHS_Service.Implementations
                     var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(detail.MotobikeProductId))
                         .Include(product => product.Discount)
                         .Include(product => product.Warranty)
-                        .FirstOrDefaultAsync();
-                    if (product == null) throw new NotFoundException($"Không tìm thấy sản phẩm {detail.MotobikeProductId}");
+                        .FirstOrDefaultAsync() ?? throw new NotFoundException($"Không tìm thấy sản phẩm {detail.MotobikeProductId}");
+                    if (product.Quantity < detail.ProductQuantity) throw new ConflictException($"Sản phẩm {product.Name} hiện tại chỉ còn {product.Quantity} sản phẩm, vui lòng điều chỉnh lại số lượng. Cửa hàng xin lỗi về sự bất tiện này.");
+                    product.Quantity -= (int)detail.ProductQuantity!;
+                    if (product.Quantity.Equals(0))
+                    {
+                        product.Status = ProductStatus.OutOfStock;
+                    }
+                    _motobikeProductRepository.Update(product);
 
                     //áp dụng giảm giá
                     int productPrice = product.PriceCurrent;
@@ -558,8 +560,8 @@ namespace ARTHS_Service.Implementations
                 {
                     Id = Guid.NewGuid(),
                     OrderId = orderId,
-                    WarrantyStartDate = DateTime.UtcNow.AddHours(7),
-                    WarrantyEndDate = DateTime.UtcNow.AddHours(7)
+                    //WarrantyStartDate = DateTime.UtcNow.AddHours(7),
+                    //WarrantyEndDate = DateTime.UtcNow.AddHours(7)
                 };
 
                 var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(detail.MotobikeProductId))
@@ -631,7 +633,7 @@ namespace ARTHS_Service.Implementations
                 Data = new NotificationDataViewModel
                 {
                     CreateAt = DateTime.UtcNow.AddHours(7),
-                    Type = NotificationType.RepairService.ToString(),
+                    Type = NotificationType.Purchase.ToString(),
                     Link = order.Id
                 }
             };

@@ -11,6 +11,7 @@ namespace ARTHS_Service.Interfaces
         Task<FeedbackProductViewModel> UpdateProductFeedback(Guid customerId, Guid feedbackId, UpdateFeedbackProductModel model);
         Task<FeedbackStaffViewModel> GetFeedbackStaff(Guid Id);
         Task<FeedbackStaffViewModel> CreateFeedbackStaff(CreateFeedbackStaffModel model);
+        Task<FeedbackStaffViewModel> UpdateFeedbackStaff(Guid id, UpdateFeedbackStaffModel model);
 
     }
 }

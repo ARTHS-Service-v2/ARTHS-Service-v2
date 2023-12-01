@@ -3,7 +3,6 @@ using ARTHS_Data.Models.Internal;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 

@@ -77,12 +77,23 @@ namespace ARTHS_API.Controllers
         [Route("staff")]
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(FeedbackStaffViewModel), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         [SwaggerOperation(Summary = "Create feedback for staff.")]
         public async Task<ActionResult<FeedbackProductViewModel>> CreateFeedbackStaff([FromBody] CreateFeedbackStaffModel model)
         {
             //var auth = (AuthModel?)HttpContext.Items["User"];
             var staffFeedback = await _feedbackProductService.CreateFeedbackStaff( model);
+            return CreatedAtAction(nameof(GetFeedbackStaff), new { id = staffFeedback.Id }, staffFeedback);
+        }
+
+        [HttpPut]
+        [Route("staff/{id}")]
+        [Authorize(UserRole.Customer)]
+        [ProducesResponseType(typeof(FeedbackStaffViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Update feedback for staff.")]
+        public async Task<ActionResult<FeedbackProductViewModel>> UpdateStaffFeedback([FromRoute] Guid Id, [FromBody] UpdateFeedbackStaffModel model)
+        {
+            var auth = (AuthModel?)HttpContext.Items["User"];
+            var staffFeedback = await _feedbackProductService.UpdateFeedbackStaff( Id, model);
             return CreatedAtAction(nameof(GetFeedbackStaff), new { id = staffFeedback.Id }, staffFeedback);
         }
     }

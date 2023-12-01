@@ -11,6 +11,7 @@ namespace ARTHS_Service.Interfaces
         Task<ListViewModel<NotificationViewModel>> GetNotifications(Guid accountId, PaginationRequestModel pagination);
         Task<bool> SendNotification(ICollection<Guid> accountIds, CreateNotificationModel model);
         Task<NotificationViewModel> UpdateNotification(Guid id, UpdateNotificationModel model);
+        Task<bool> MakeAsRead(Guid accountId);
         Task<bool> DeleteNotification(Guid Id);
         Task<List<string?>> GetDeviceToken(Guid accountId);
         Task CheckAndSendMaintenanceReminders();

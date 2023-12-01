@@ -1,7 +1,6 @@
 ﻿using ARTHS_Data.Models.Internal;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
-using ARTHS_Utility.Exceptions;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace ARTHS_API.Configurations.Middleware
 {

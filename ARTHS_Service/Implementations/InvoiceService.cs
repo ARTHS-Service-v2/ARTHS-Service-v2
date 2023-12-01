@@ -1,18 +1,16 @@
 ﻿using ARTHS_Data;
+using ARTHS_Data.Entities;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using AutoMapper;
-using PdfSharp.Drawing.Layout;
-using PdfSharp.Drawing;
-using PdfSharp.Pdf;
-using System.Globalization;
-using Microsoft.EntityFrameworkCore;
-using ARTHS_Data.Entities;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
-using ARTHS_Utility.Helpers.Fonts;
-using PdfSharp.Fonts;
+using Microsoft.EntityFrameworkCore;
+using PdfSharp.Drawing;
+using PdfSharp.Drawing.Layout;
+using PdfSharp.Pdf;
+using System.Globalization;
 
 namespace ARTHS_Service.Implementations
 {

@@ -2,7 +2,6 @@
 using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
-using ARTHS_Data.Repositories.Implementations;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
@@ -20,12 +19,14 @@ namespace ARTHS_Service.Implementations
         private readonly IOrderRepository _orderRepository;
         private readonly INotificationService _notificationService;
         private readonly IRevenueStoreRepository _revenueStoreRepository;
+        private readonly INotificationRepository _notificationRepository;
 
         public GhnService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService) : base(unitOfWork, mapper)
         {
             _orderRepository = unitOfWork.Order;
             _notificationService = notificationService;
             _revenueStoreRepository = unitOfWork.RevenueStore;
+            _notificationRepository = unitOfWork.Notification;
         }
 
         public async Task<GhnCreateResponseModel> CreateShippingOrder(GhnCreateOrderModel model)
@@ -136,6 +137,13 @@ namespace ARTHS_Service.Implementations
 
         private async Task SendNotificationToCustomer(Order order)
         {
+            var oldNotis = await _notificationRepository.GetMany(noti => noti.Link != null && noti.Link.Equals(order.Id)).ToListAsync();
+            if(oldNotis.Count > 0)
+            {
+                _notificationRepository.RemoveRange(oldNotis);
+                await _unitOfWork.SaveChanges();
+            }
+
             var message = new CreateNotificationModel
             {
                 Title = $"Giao hàng thành công.",
@@ -143,7 +151,7 @@ namespace ARTHS_Service.Implementations
                 Data = new NotificationDataViewModel
                 {
                     CreateAt = DateTime.UtcNow.AddHours(7),
-                    Type = NotificationType.RepairService.ToString(),
+                    Type = NotificationType.Purchase.ToString(),
                     Link = order.Id
                 }
             };
@@ -159,7 +167,7 @@ namespace ARTHS_Service.Implementations
                 Data = new NotificationDataViewModel
                 {
                     CreateAt = DateTime.UtcNow.AddHours(7),
-                    Type = NotificationType.RepairService.ToString(),
+                    Type = NotificationType.Purchase.ToString(),
                     Link = order.Id
                 }
             };

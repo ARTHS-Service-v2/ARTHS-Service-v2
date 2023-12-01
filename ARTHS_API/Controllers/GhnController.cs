@@ -1,8 +1,6 @@
-﻿using ARTHS_Service.Implementations;
-using ARTHS_Service.Interfaces;
-using ARTHS_Utility.Helpers.Models;
+﻿using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Helpers;
-using Microsoft.AspNetCore.Http;
+using ARTHS_Utility.Helpers.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
