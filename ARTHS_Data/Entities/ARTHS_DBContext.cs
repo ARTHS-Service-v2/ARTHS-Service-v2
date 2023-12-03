@@ -145,8 +145,6 @@ namespace ARTHS_Data.Entities
 
             modelBuilder.Entity<Configuration>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable("Configuration");
             });
 

@@ -36,6 +36,10 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(m => m.OrderDetailId.Equals(filter.OrderDetailId.Value));
             }
+            if(filter.FromDate.HasValue && filter.ToDate.HasValue && filter.FromDate.Value.Date < filter.ToDate.Value.Date)
+            {
+                query = query.Where(m => m.NextMaintenanceDate.Date >= filter.FromDate.Value.Date && m.NextMaintenanceDate.Date <= filter.ToDate.Value.Date);
+            }
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
                .Skip(pagination.PageNumber * pagination.PageSize)

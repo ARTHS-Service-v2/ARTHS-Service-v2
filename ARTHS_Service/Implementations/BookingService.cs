@@ -44,6 +44,10 @@ namespace ARTHS_Service.Implementations
                 query = query.Where(booking => booking.StaffId.Equals(filter.StaffId.Value));
 
             }
+            if (!string.IsNullOrEmpty(filter.PhoneNumber))
+            {
+                query = query.Include(booking => booking.Customer).ThenInclude(customer => customer.Account).Where(booking => booking.Customer.Account.PhoneNumber.Equals(filter.PhoneNumber));
+            }
             if (!string.IsNullOrEmpty(filter.BookingDate))
             {
                 DateTime dateBook;
@@ -66,7 +70,7 @@ namespace ARTHS_Service.Implementations
                 .OrderByDescending(booking => booking.CreateAt);
             var bookings = await listBooking.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
             var totalRow = await listBooking.AsNoTracking().CountAsync();
-            if (bookings != null && bookings.Any())
+            if (bookings != null || bookings != null && bookings.Any())
             {
                 return new ListViewModel<RepairBookingViewModel>
                 {
