@@ -35,7 +35,8 @@ namespace ARTHS_API.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(RepairBookingViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(RepairBookingViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get booking repair service of customer.")]
         public async Task<ActionResult<RepairBookingViewModel>> GetRepairBooking([FromRoute] Guid Id)
         {
@@ -58,6 +59,8 @@ namespace ARTHS_API.Controllers
         [Route("{id}")]
         [ProducesResponseType(typeof(RepairBookingViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update booking repair service for customer.")]
         public async Task<ActionResult<RepairBookingViewModel>> UpdateRepairBooking([FromRoute] Guid Id, [FromBody] UpdateRepairBookingModel model)
         {

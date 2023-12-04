@@ -140,10 +140,12 @@ namespace ARTHS_Service.Implementations
         public async Task<MotobikeProductDetailViewModel> CreateMotobikeProduct(CreateMotobikeProductModel model)
         {
             var imageCount = model.Images.Count();
+            
             if (imageCount < 1 || imageCount > 4)
             {
                 throw new BadRequestException("Phải có ít nhất một hình để tạo và không được quá 4 hình.");
             }
+
             foreach (IFormFile image in model.Images)
             {
                 if (!image.ContentType.StartsWith("image/"))

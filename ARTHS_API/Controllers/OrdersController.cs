@@ -7,6 +7,7 @@ using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -36,6 +37,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(OrderViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get order by id.")]
         public async Task<ActionResult<OrderViewModel>> GetOrder([FromRoute] string Id)
         {
@@ -47,6 +49,11 @@ namespace ARTHS_API.Controllers
         [Route("offline")]
         [Authorize(UserRole.Teller)]
         [ProducesResponseType(typeof(OrderViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+
         [SwaggerOperation(Summary = "Create offline order.")]
         public async Task<ActionResult<OrderViewModel>> CreateOrderOffline([FromBody] CreateOrderOfflineModel model)
         {
@@ -59,6 +66,9 @@ namespace ARTHS_API.Controllers
         [Route("offline/{id}")]
         [Authorize(UserRole.Teller, UserRole.Staff)]
         [ProducesResponseType(typeof(OrderViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         [SwaggerOperation(Summary = "Update offline order.")]
         public async Task<ActionResult<OrderViewModel>> UpdateOrderOffline([FromRoute] string Id, [FromBody] UpdateInStoreOrderModel model)
         {
@@ -70,6 +80,9 @@ namespace ARTHS_API.Controllers
         [Route("online")]
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(OrderViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         [SwaggerOperation(Summary = "Create online order.")]
         public async Task<ActionResult<OrderViewModel>> CreateOrderOnline([FromBody] CreateOrderOnlineModel model)
         {
@@ -81,6 +94,9 @@ namespace ARTHS_API.Controllers
         [HttpPut]
         [Route("online/{id}")]
         [ProducesResponseType(typeof(OrderViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         [SwaggerOperation(Summary = "Update online order.")]
         public async Task<ActionResult<OrderViewModel>> UpdateOrderOnline([FromRoute] string Id, [FromBody] UpdateOrderOnlineModel model)
         {
@@ -91,6 +107,7 @@ namespace ARTHS_API.Controllers
 
         [HttpGet]
         [Route("generate-invoice/{id}")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Generate bill for order.")]
         public async Task<ActionResult<string>> Get([FromRoute] string Id)
         {

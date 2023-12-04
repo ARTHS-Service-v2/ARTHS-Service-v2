@@ -3,6 +3,7 @@ using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -38,6 +39,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get vehicle by id.")]
         public async Task<ActionResult> GetVehicle([FromRoute] Guid id)
         {
@@ -56,6 +58,7 @@ namespace ARTHS_API.Controllers
         
         [HttpPost]
         [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         [SwaggerOperation(Summary = "Create vehicle.")]
         public async Task<ActionResult<VehicleViewModel>> CreateVehicle([FromBody] CreateVehicleRequest request)
         {

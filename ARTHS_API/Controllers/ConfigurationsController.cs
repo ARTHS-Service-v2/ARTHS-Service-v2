@@ -1,6 +1,7 @@
 ﻿using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -27,6 +28,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPut]
         [ProducesResponseType(typeof(ConfigurationViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update settings.")]
         public async Task<ActionResult<ConfigurationViewModel>> UpdateBookingSetting([FromBody] UpdateConfigurationModel model)
         {

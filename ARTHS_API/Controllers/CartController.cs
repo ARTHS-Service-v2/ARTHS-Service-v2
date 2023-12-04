@@ -25,6 +25,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(CartViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [SwaggerOperation(Summary = "Get cart for current logged in customer.")]
         public async Task<ActionResult<CartViewModel>> GetCart()
         {
@@ -35,6 +36,8 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(CartViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Add product to cart")]
         public async Task<ActionResult<CartViewModel>> AddToCart(List<CreateCartModel> model)
@@ -48,6 +51,7 @@ namespace ARTHS_API.Controllers
         [Route("{id}")]
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(CartViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update cart")]
         public async Task<ActionResult<CartViewModel>> UpdateCart([FromRoute] Guid Id, [FromBody] UpdateCartModel model)

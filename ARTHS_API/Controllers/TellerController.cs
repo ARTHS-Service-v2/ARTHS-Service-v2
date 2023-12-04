@@ -37,6 +37,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(TellerViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get teller by id.")]
         public async Task<ActionResult<TellerViewModel>> GetTeller([FromRoute] Guid id)
         {

@@ -27,6 +27,7 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(TokenViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Login.")]
         public async Task<IActionResult> Authenticated([FromBody][Required] AuthRequest auth)
         {
@@ -47,7 +48,6 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [Route("logout")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Logout.")]
         public IActionResult Logout()
         {

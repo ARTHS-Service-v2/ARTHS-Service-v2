@@ -46,14 +46,14 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(order => !order.Status.Equals(filter.ExcludeStatus));
             }
-            
+
 
             var listAccount = query
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
                 .OrderByDescending(account => account.CreateAt);
             var accounts = await listAccount.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
             var totalRow = await listAccount.AsNoTracking().CountAsync();
-            if(accounts != null || accounts != null && accounts.Any())
+            if (accounts != null || accounts != null && accounts.Any())
             {
                 return new ListViewModel<AccountViewModel>
                 {

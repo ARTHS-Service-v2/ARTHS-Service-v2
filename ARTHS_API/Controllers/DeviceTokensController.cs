@@ -3,6 +3,7 @@ using ARTHS_Data.Models.Internal;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -22,6 +23,7 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [Authorize(UserRole.Staff, UserRole.Owner, UserRole.Teller, UserRole.Customer)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [SwaggerOperation(Summary = "Create new device token for user.")]
         public async Task<ActionResult<bool>> CreateDeviceToken([FromBody] CreateDeviceTokenModel model)
         {

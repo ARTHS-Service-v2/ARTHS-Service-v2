@@ -37,6 +37,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(OwnerViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get owner by id.")]
         public async Task<ActionResult<OwnerViewModel>> GetOwner([FromRoute] Guid id)
         {

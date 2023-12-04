@@ -67,9 +67,8 @@ namespace ARTHS_Service.Implementations
                     transaction.Rollback();
                     throw;
                 }
-
-                return result > 0 ? await GetWarranty(warrantyId) : null!;
-            }
+            };
+            return result > 0 ? await GetWarranty(warrantyId) : null!;
         }
 
         public async Task<WarrantyViewModel> UpdateWarranty(Guid id, UpdateWarrantyRequest model)

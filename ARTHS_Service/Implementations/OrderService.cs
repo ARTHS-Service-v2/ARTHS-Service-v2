@@ -513,13 +513,17 @@ namespace ARTHS_Service.Implementations
             {
                 try
                 {
-                    var order = await _orderRepository.GetMany(order => order.Id.Equals(orderId) && order.CustomerId != null)
+                    var order = await _orderRepository.GetMany(order => order.Id.Equals(orderId) && !order.CustomerPhoneNumber.Equals(null))
                         .Include(order => order.OrderDetails)
                             .ThenInclude(detail => detail.RepairService)
                         .FirstOrDefaultAsync();
                     if (order == null) return;
+
                     var details = order.OrderDetails.Where(detail => detail.RepairService != null && detail.RepairService.ReminderInterval != null);
                     if (details == null) return;
+
+                    var customer = await _accountRepository.GetMany(acc => acc.PhoneNumber.Equals(order.CustomerPhoneNumber) && acc.Role.RoleName.Equals(UserRole.Customer)).Include(acc => acc.Role).FirstOrDefaultAsync();
+                    if (customer == null) return;
 
                     foreach (var detail in details)
                     {
@@ -528,7 +532,7 @@ namespace ARTHS_Service.Implementations
                         var schedule = new MaintenanceSchedule
                         {
                             Id = Guid.NewGuid(),
-                            CustomerId = (Guid)order.CustomerId!,
+                            CustomerId = customer.Id,
                             OrderDetailId = detail.Id,
                             NextMaintenanceDate = nextMaintenanceDate,
                             ReminderDate = reminderDate,

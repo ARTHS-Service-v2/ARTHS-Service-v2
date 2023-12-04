@@ -5,6 +5,7 @@ using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Helpers;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
@@ -40,6 +41,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(NotificationViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get notification by id.")]
         public async Task<ActionResult<NotificationViewModel>> GetNotification([FromRoute] Guid Id)
         {
@@ -128,7 +130,7 @@ namespace ARTHS_API.Controllers
                 await messaging.SendMulticastAsync(message);
                 return "Send thành công";
             }
-            return "Send thaất bại";
+            return "Send thất bại";
         }
     }
 }

@@ -6,6 +6,7 @@ using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -34,6 +35,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(MotobikeProductDetailViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get motobike products by id.")]
         public async Task<ActionResult<MotobikeProductDetailViewModel>> GetMotobikeProduct([FromRoute] Guid id)
         {
@@ -43,6 +45,8 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [Authorize(UserRole.Owner)]
         [ProducesResponseType(typeof(MotobikeProductDetailViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+
         [SwaggerOperation(Summary = "Create motobike product.")]
         public async Task<ActionResult<MotobikeProductDetailViewModel>> CreateMotobileProduct([FromForm][Required] CreateMotobikeProductModel model)
         {
@@ -54,6 +58,8 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MotobikeProductDetailViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update motobike product.")]
         public async Task<ActionResult<MotobikeProductDetailViewModel>> UpdateMotobileProduct([FromRoute] Guid id, [FromForm] UpdateMotobikeProductModel model)
         {
@@ -65,6 +71,7 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner)]
         [Route("image/{id}")]
         [ProducesResponseType(typeof(MotobikeProductDetailViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update motobike product image.")]
         public async Task<ActionResult<MotobikeProductDetailViewModel>> UpdateMotobileProductImage([FromRoute] Guid id, [FromForm] UpdateImageModel model)
         {
@@ -76,6 +83,7 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner)]
         [Route("image/{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Remove motobike product image.")]
         public async Task<IActionResult> Remove([FromRoute] Guid id)
         {

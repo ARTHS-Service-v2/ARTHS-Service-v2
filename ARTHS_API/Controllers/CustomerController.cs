@@ -38,6 +38,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Get customer by id.")]
         public async Task<ActionResult<CustomerViewModel>> GetCustomer([FromRoute] Guid id)
         {

@@ -39,6 +39,7 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(FeedbackProductViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Create feedback of product by customer.")]
         public async Task<ActionResult<FeedbackProductViewModel>> CreateProductFeedback([FromBody] CreateFeedbackProductModel model)
         {
@@ -53,6 +54,7 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(FeedbackProductViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Update feedback for product.")]
         public async Task<ActionResult<FeedbackProductViewModel>> UpdateProductFeedback([FromRoute] Guid Id, [FromBody] UpdateFeedbackProductModel model)
         {
@@ -77,6 +79,7 @@ namespace ARTHS_API.Controllers
         [Route("staff")]
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(FeedbackStaffViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Create feedback for staff.")]
         public async Task<ActionResult<FeedbackProductViewModel>> CreateFeedbackStaff([FromBody] CreateFeedbackStaffModel model)
         {
@@ -89,6 +92,7 @@ namespace ARTHS_API.Controllers
         [Route("staff/{id}")]
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(FeedbackStaffViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Update feedback for staff.")]
         public async Task<ActionResult<FeedbackProductViewModel>> UpdateStaffFeedback([FromRoute] Guid Id, [FromBody] UpdateFeedbackStaffModel model)
         {

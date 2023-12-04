@@ -6,6 +6,7 @@ using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -34,6 +35,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(RepairServiceViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get repair service by id.")]
         public async Task<ActionResult<RepairServiceViewModel>> GetRepairService([FromRoute] Guid id)
         {
@@ -43,6 +45,7 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [Authorize(UserRole.Owner)]
         [ProducesResponseType(typeof(RepairServiceViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Create repair service.")]
         public async Task<ActionResult<RepairServiceViewModel>> CreateRepairService([FromForm][Required] CreateRepairServiceModel model)
         {
@@ -55,6 +58,8 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner)]
         [Route("{id}")]
         [ProducesResponseType(typeof(RepairServiceViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+
         [SwaggerOperation(Summary = "Update repair service.")]
         public async Task<ActionResult<RepairServiceViewModel>> UpdateRepairService([FromRoute] Guid id, [FromForm] UpdateRepairServiceModel model)
         {
@@ -66,6 +71,7 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner)]
         [Route("image/{id}")]
         [ProducesResponseType(typeof(RepairServiceViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update repair service image.")]
         public async Task<ActionResult<MotobikeProductDetailViewModel>> UpdateMotobileProductImage([FromRoute] Guid id, [FromForm] UpdateImageModel model)
         {
@@ -77,6 +83,7 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner)]
         [Route("image/{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Remove repair service image.")]
         public async Task<IActionResult> Remove([FromRoute] Guid id)
         {

@@ -6,6 +6,7 @@ using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -33,6 +34,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get discount by id.")]
         public async Task<ActionResult<DiscountViewModel>> GetDiscount([FromRoute] Guid id)
         {
@@ -42,6 +44,7 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [Authorize(UserRole.Owner)]
         [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Create discount.")]
         public async Task<ActionResult<DiscountViewModel>> CreateDiscount([FromForm][Required] CreateDiscountModel model)
         {
@@ -54,33 +57,14 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner)]
         [Route("{id}")]
         [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update discount.")]
         public async Task<ActionResult<DiscountViewModel>> UpdateDiscount([FromRoute] Guid id, [FromForm] UpdateDiscountModel model)
         {
             var Discount = await _discountService.UpdateDiscount(id, model);
             return CreatedAtAction(nameof(GetDiscount), new { id = Discount.Id }, Discount);
         }
-
-        //[HttpDelete]
-        ////[Authorize(UserRole.Owner)]
-        //[Route("product/{id}")]
-        //[ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
-        //[SwaggerOperation(Summary = "Remove discounts from products.")]
-        //public async Task<ActionResult<DiscountViewModel>> RemoveDiscountFromProduct([FromRoute] Guid id)
-        //{
-        //    var result = await _discountService.RemoveDiscountInProduct(id);
-        //    return result != null ? Ok("xóa thành công") : NotFound();
-        //}
-        //[HttpDelete]
-        ////[Authorize(UserRole.Owner)]
-        //[Route("service/{id}")]
-        //[ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
-        //[SwaggerOperation(Summary = "Remove discounts from service.")]
-        //public async Task<ActionResult<DiscountViewModel>> RemoveDiscountFromService([FromRoute] Guid id)
-        //{
-        //    var result = await _discountService.RemoveDiscountInService(id);
-        //    return result != null ? Ok("xóa thành công") : NotFound();
-        //}
 
         [HttpDelete]
         [Authorize(UserRole.Owner)]

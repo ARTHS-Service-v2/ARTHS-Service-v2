@@ -37,6 +37,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(StaffDetailViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get staff by id.")]
         public async Task<ActionResult<StaffDetailViewModel>> GetStaff([FromRoute] Guid id)
         {
@@ -45,7 +46,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(StaffDetailViewModel), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(StaffDetailViewModel), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         [SwaggerOperation(Summary = "Register staff.")]
         public async Task<ActionResult<StaffDetailViewModel>> CreateStaff([FromBody][Required] RegisterStaffModel model)
         {

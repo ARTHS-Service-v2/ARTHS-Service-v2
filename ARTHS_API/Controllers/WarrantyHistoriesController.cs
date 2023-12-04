@@ -3,6 +3,7 @@ using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
+using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -30,6 +31,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(WarrantyHistoryViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get warranty history of orders.")]
         public async Task<ActionResult<WarrantyHistoryViewModel>> GetWarranty([FromRoute] Guid id)
         {
@@ -38,6 +40,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(WarrantyHistoryViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         [SwaggerOperation(Summary = "Create warranty history for order.")]
         public async Task<ActionResult<WarrantyHistoryViewModel>> CreateWarranty([FromBody] CreateWarrantyModel model)
         {
