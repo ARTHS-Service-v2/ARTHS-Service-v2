@@ -66,9 +66,9 @@ namespace ARTHS_API.Controllers
             return CreatedAtAction(nameof(GetDiscount), new { id = Discount.Id }, Discount);
         }
 
-        [HttpDelete]
+        [HttpPut]
         [Authorize(UserRole.Owner)]
-        [Route("{id}")]
+        [Route("discontinued/{id}")]
         [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Discontinued discounts.")]
         public async Task<ActionResult<DiscountViewModel>> DiscontinuedDiscount([FromRoute] Guid id)

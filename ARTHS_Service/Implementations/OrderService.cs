@@ -465,6 +465,7 @@ namespace ARTHS_Service.Implementations
                     if (product.Discount != null)
                     {
                         productPrice = productPrice * (100 - product.Discount.DiscountAmount) / 100;
+                        orderDetail.DiscountId = product.DiscountId;
                     }
                     orderDetail.Price = productPrice;
                     detailPrice = productPrice * detail.ProductQuantity.GetValueOrDefault(1);
@@ -491,6 +492,8 @@ namespace ARTHS_Service.Implementations
                     if(repairService.Discount != null)
                     {
                         servicePrice = servicePrice * (100 - repairService.Discount.DiscountAmount) / 100;
+                        orderDetail.DiscountId = repairService.DiscountId;
+
                     }
                     detailPrice = servicePrice;
                     orderDetail.RepairServiceId = detail.RepairServiceId;
@@ -586,6 +589,7 @@ namespace ARTHS_Service.Implementations
                 if (product.Discount != null)
                 {
                     productPrice = productPrice * (100 - product.Discount.DiscountAmount) / 100;
+                    orderDetail.DiscountId = product.DiscountId;
                 }
                 orderDetail.Price = productPrice;
                 detailPrice = productPrice * detail.ProductQuantity;
@@ -617,7 +621,7 @@ namespace ARTHS_Service.Implementations
             var message = new CreateNotificationModel
             {
                 Title = $"Đơn sửa chữa của khách hàng {order.CustomerName}.",
-                Body = $"Đơn hàng {order.Id} đã được bàn giao cho bạn. Vui lòng tiến hành sửa chữa.",
+                Body = $"Đơn hàng {order.Id} đã được bàn giao cho bạn. Vui lòng tiến hành sửa chữa và xác nhận đã sửa xong sau khi hoàn tất sửa chữa.",
                 Data = new NotificationDataViewModel
                 {
                     CreateAt = DateTime.UtcNow.AddHours(7),
@@ -633,7 +637,7 @@ namespace ARTHS_Service.Implementations
             var message = new CreateNotificationModel
             {
                 Title = $"Đơn hàng của bạn đã được xác nhận.",
-                Body = $"Đơn hàng {order.Id} của bạn đã được xác nhận. Cảm ơn bạn đã sử dụng dịch vụ bên chúng tôi.",
+                Body = $"Đơn hàng {order.Id} của bạn đã được xác nhận và sẽ được đóng gói và bàn giao cho bên GHN sớm nhất để có thể giao tới bạn. Cảm ơn bạn đã sử dụng dịch vụ bên chúng tôi.",
                 Data = new NotificationDataViewModel
                 {
                     CreateAt = DateTime.UtcNow.AddHours(7),

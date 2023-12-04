@@ -14,6 +14,7 @@ namespace ARTHS_Data.Entities
         public string OrderId { get; set; } = null!;
         public Guid? MotobikeProductId { get; set; }
         public Guid? RepairServiceId { get; set; }
+        public Guid? DiscountId { get; set; }
         public int Quantity { get; set; }
         public int Price { get; set; }
         public bool InstUsed { get; set; }
@@ -22,6 +23,7 @@ namespace ARTHS_Data.Entities
         public DateTime? WarrantyEndDate { get; set; }
         public DateTime CreateAt { get; set; }
 
+        public virtual Discount? Discount { get; set; }
         public virtual MotobikeProduct? MotobikeProduct { get; set; }
         public virtual Order Order { get; set; } = null!;
         public virtual RepairService? RepairService { get; set; }

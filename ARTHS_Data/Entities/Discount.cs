@@ -8,6 +8,7 @@ namespace ARTHS_Data.Entities
         public Discount()
         {
             MotobikeProducts = new HashSet<MotobikeProduct>();
+            OrderDetails = new HashSet<OrderDetail>();
             RepairServices = new HashSet<RepairService>();
         }
 
@@ -21,6 +22,7 @@ namespace ARTHS_Data.Entities
         public string Status { get; set; } = null!;
 
         public virtual ICollection<MotobikeProduct> MotobikeProducts { get; set; }
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
         public virtual ICollection<RepairService> RepairServices { get; set; }
     }
 }
