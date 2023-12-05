@@ -57,7 +57,7 @@ namespace ARTHS_Service.Implementations
             var revenue = await _revenueStoreRepository.GetMany(transaction => transaction.Id.Equals(model.TxnRef)).FirstOrDefaultAsync();
             if (revenue == null) throw new NotFoundException("Không tìm thấy thông tin của revenue");
             var order = await _orderRepository.GetMany(order => order.Id.Equals(revenue.OrderId)).FirstOrDefaultAsync();
-            if (order == null || !order.Status.Equals(OrderStatus.Processing) || !order.Status.Equals(OrderStatus.WaitForPay)) return false;
+            if (order == null || !order.Status.Equals(OrderStatus.Processing) && !order.Status.Equals(OrderStatus.WaitForPay)) return false;
             if (model.ResponseCode == "00")
             {
                 order.Status = OrderStatus.Paid;
