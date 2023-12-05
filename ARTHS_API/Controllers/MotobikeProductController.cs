@@ -33,6 +33,15 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
+        [Route("best-sellers")]
+        [ProducesResponseType(typeof(List<BestSellersViewModel>), StatusCodes.Status200OK)]
+        [SwaggerOperation(Summary = "Get best sellers motobike products.")]
+        public async Task<ActionResult<List<BestSellersViewModel>>> GetBestSellerMotobikeProducts()
+        {
+            return await _motobikeProductService.GetBestSellerMotobikeProducts();
+        }
+
+        [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(MotobikeProductDetailViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

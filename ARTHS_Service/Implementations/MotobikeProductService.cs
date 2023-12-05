@@ -22,17 +22,50 @@ namespace ARTHS_Service.Implementations
         private readonly IImageRepository _imageRepository;
         private readonly IMotobikeProductPriceRepository _motobikeProductPriceRepository;
         private readonly IVehicleRepository _vehicleRepository;
+        private readonly IOrderDetailRepository _orderDetailRepository;
 
         private readonly ICloudStorageService _cloudStorageService;
 
         public MotobikeProductService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
         {
-            _motobikeProductRepository = _unitOfWork.MotobikeProduct;
-            _imageRepository = _unitOfWork.Image;
-            _motobikeProductPriceRepository = _unitOfWork.MotobikeProductPrice;
-            _vehicleRepository = _unitOfWork.Vehicle;
+            _motobikeProductRepository = unitOfWork.MotobikeProduct;
+            _imageRepository = unitOfWork.Image;
+            _motobikeProductPriceRepository = unitOfWork.MotobikeProductPrice;
+            _vehicleRepository = unitOfWork.Vehicle;
+            _orderDetailRepository = unitOfWork.OrderDetail;
 
             _cloudStorageService = cloudStorageService;
+        }
+
+        public async Task<List<BestSellersViewModel>> GetBestSellerMotobikeProducts()
+        {
+            var bestSellers = await _orderDetailRepository
+                                    .GetAll()
+                                    .GroupBy(detail => detail.MotobikeProductId)
+                                    .Select(product => new
+                                    {
+                                        MotobikeProductId = product.Key,
+                                        TotalQuantitySold = product.Sum(od => od.Quantity)
+                                    })
+                                    .OrderByDescending(product => product.TotalQuantitySold)
+                                    .Take(10)
+                                    .ToListAsync();
+            var bestSellerProducts = new List<BestSellersViewModel>();
+            foreach (var seller in bestSellers)
+            {
+                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(seller.MotobikeProductId))
+                    .ProjectTo<MotobikeProductDetailViewModel>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
+                if(product != null)
+                {
+                    bestSellerProducts.Add(new BestSellersViewModel
+                    {
+                        TotalQuantitySold = seller.TotalQuantitySold,
+                        Product = product
+                    });
+                }
+            }
+            return bestSellerProducts;
         }
 
         public async Task<ListViewModel<MotobikeProductDetailViewModel>> GetMotobikeProducts(MotobikeProductFilterModel filter, PaginationRequestModel pagination)
