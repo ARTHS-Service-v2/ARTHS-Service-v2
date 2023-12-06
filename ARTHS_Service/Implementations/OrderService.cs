@@ -531,7 +531,7 @@ namespace ARTHS_Service.Implementations
                     foreach (var detail in details)
                     {
                         var nextMaintenanceDate = DateTime.UtcNow.AddMonths((int)detail.RepairService!.ReminderInterval!);
-                        var reminderDate = nextMaintenanceDate.AddDays(-15);
+                        var reminderDate = nextMaintenanceDate.AddDays(-7);
                         var schedule = new MaintenanceSchedule
                         {
                             Id = Guid.NewGuid(),

@@ -46,7 +46,7 @@ namespace ARTHS_Service.Implementations
             }
             if (!string.IsNullOrEmpty(filter.PhoneNumber))
             {
-                query = query.Include(booking => booking.Customer).ThenInclude(customer => customer.Account).Where(booking => booking.Customer.Account.PhoneNumber.Equals(filter.PhoneNumber));
+                query = query.Include(booking => booking.Customer).ThenInclude(customer => customer.Account).Where(booking => booking.Customer.Account.PhoneNumber.Contains(filter.PhoneNumber));
             }
             if (!string.IsNullOrEmpty(filter.BookingDate))
             {
@@ -252,7 +252,7 @@ namespace ARTHS_Service.Implementations
         {
             var message = new CreateNotificationModel
             {
-                Title = $"Bạn có lịch đặt ngày {booking.DateBook.ToString("dd-MM-yyyy")}.",
+                Title = $"Bạn có lịch đặt sửa chữa vào ngày {booking.DateBook.ToString("dd-MM-yyyy")}.",
                 Body = $"Khách hàng {booking.Customer.FullName} đã đặt bạn để sửa xe. Khách hàng dự kiến tới {booking.DateBook.ToString("dd-MM-yyyy")}. Vui lòng chú ý lịch đặt và tiếp đón khách hàng cẩn thận.",
                 Data = new NotificationDataViewModel
                 {
