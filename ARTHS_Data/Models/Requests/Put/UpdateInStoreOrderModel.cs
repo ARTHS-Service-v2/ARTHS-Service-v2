@@ -9,8 +9,6 @@ namespace ARTHS_Data.Models.Requests.Put
         public string? CustomerPhone { get; set; }
         public string? LicensePlate { get; set; }
         public string? Status { get; set; }
-
-
         public List<CreateOrderOfflineDetailModel>? OrderDetailModel { get; set; } = new List<CreateOrderOfflineDetailModel>();
     }
 }

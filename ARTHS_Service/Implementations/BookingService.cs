@@ -149,9 +149,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task<RepairBookingViewModel> UpdateBooking(Guid repairBookingId, UpdateRepairBookingModel model)
         {
-            var booking = await _repairBookingRepository.GetMany(booking => booking.Id.Equals(repairBookingId)).Include(booking => booking.Customer).FirstOrDefaultAsync();
-            if (booking == null) throw new NotFoundException("Không tìm thấy thông tin booking.");
-
+            var booking = await _repairBookingRepository.GetMany(booking => booking.Id.Equals(repairBookingId)).Include(booking => booking.Customer).FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy thông tin booking.");
             if (model.Status == RepairBookingStatus.Canceled && string.IsNullOrEmpty(model.CancellationReason))
             {
                 throw new BadRequestException("Cần phải cung cấp lý do khi hủy lịch đặt.");
@@ -186,14 +184,20 @@ namespace ARTHS_Service.Implementations
                 booking.DateBook = dateBooking.Date + timeBook;
             }
 
-            if (model.StaffId.HasValue && !booking.StaffId.Equals(model.StaffId))
+            //Update staff
+            //if (model.StaffId.HasValue && !booking.StaffId.Equals(model.StaffId))
+            //{
+            //    if (!await IsStaffAvailableForBooking(model.StaffId, booking.DateBook))
+            //    {
+            //        throw new ConflictException($"Nhân viên không còn lịch trống trong ngày {booking.DateBook:dd-MM-yyyy}, quý khách vui lòng chọn ngày khác.");
+            //    }
+            //    booking.StaffId = model.StaffId;
+            //}
+            if(!await IsStaffAvailableForBooking(booking.StaffId, booking.DateBook))
             {
-                if (!await IsStaffAvailableForBooking(model.StaffId, booking.DateBook))
-                {
-                    throw new ConflictException($"Nhân viên không còn lịch trống trong ngày {booking.DateBook:dd-MM-yyyy}, quý khách vui lòng chọn ngày khác.");
-                }
-                booking.StaffId = model.StaffId;
+                throw new ConflictException($"Nhân viên không còn lịch trống trong ngày {booking.DateBook:dd-MM-yyyy}, quý khách vui lòng chọn ngày khác.");
             }
+
 
             booking.Description = model.Description ?? booking.Description;
             booking.Status = model.Status ?? booking.Status;
@@ -210,10 +214,10 @@ namespace ARTHS_Service.Implementations
             return result > 0 ? await GetRepairBooking(repairBookingId) : null!;
         }
 
-        private async Task<bool> IsStaffAvailableForBooking(Guid? staffId, DateTime? dateBook)
+        private async Task<bool> IsStaffAvailableForBooking(Guid? staffId, DateTime dateBook)
         {
             var countBookingOfStaff = await _repairBookingRepository
-                .GetMany(booking => booking.StaffId.Equals(staffId) && booking.DateBook.Date.Equals(dateBook))
+                .GetMany(booking => booking.StaffId.Equals(staffId) && booking.DateBook.Date.Equals(dateBook.Date) && !booking.Status.Equals(RepairBookingStatus.Canceled))
                 .CountAsync();
             if (countBookingOfStaff.Equals(await _configurationService.CalculateDailyStaffReceivedBookings()))
             {

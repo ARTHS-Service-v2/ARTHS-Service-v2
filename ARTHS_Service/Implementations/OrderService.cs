@@ -30,6 +30,7 @@ namespace ARTHS_Service.Implementations
         private readonly IConfigurationService _configurationService;
         private readonly IRevenueStoreRepository _revenueStoreRepository;
         private readonly IMaintenanceScheduleRepository _maintenanceScheduleRepository;
+        private readonly INotificationRepository _notificationRepository;
         
 
         public OrderService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService, IConfigurationService configurationService) : base(unitOfWork, mapper)
@@ -46,7 +47,7 @@ namespace ARTHS_Service.Implementations
             _configurationService = configurationService;
             _revenueStoreRepository = unitOfWork.RevenueStore;
             _maintenanceScheduleRepository = unitOfWork.MaintenanceSchedule;
-            
+            _notificationRepository = unitOfWork.Notification;
         }
 
         public async Task<ListViewModel<OrderViewModel>> GetOrders(OrderFilterModel filter, PaginationRequestModel pagination)
@@ -320,6 +321,7 @@ namespace ARTHS_Service.Implementations
                     if(order.StaffId != null)
                     {
                         await ChangeStatusOfStaff(order.StaffId, UserStatus.Active);
+                        await RemoveNotification(order.StaffId, order.Id);
                     }
                     order.StaffId = null;
                 }
@@ -327,8 +329,12 @@ namespace ARTHS_Service.Implementations
                 {
                     if (!model.StaffId.Equals(order.StaffId))
                     {
-                        await ChangeStatusOfStaff(order.StaffId, UserStatus.Active);
-
+                        if(order.StaffId != null)
+                        {
+                            await ChangeStatusOfStaff(order.StaffId, UserStatus.Active);
+                            await RemoveNotification(order.StaffId, order.Id);
+                        }
+                        
                         if (!model.StaffId.HasValue) throw new BadRequestException("Vui lòng chọn nhân viên");
                         var staff = await _accountRepository.GetMany(staff => staff.Id.Equals(model.StaffId)).FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy nhân viên");
                         if (staff.Status.Equals(UserStatus.Busy)) throw new ConflictException("Nhân viên đang bận vui lòng chọn nhân viên khác");
@@ -349,6 +355,12 @@ namespace ARTHS_Service.Implementations
 
 
         //PRIVATE
+        private async Task RemoveNotification(Guid? accountId, string orderId)
+        {
+            var notifications = await _notificationRepository.GetMany(noti => noti.AccountId.Equals(accountId) && noti.Link!.Equals(orderId)).ToListAsync();
+            _unitOfWork.Notification.RemoveRange(notifications);
+        }
+
         private async Task UpdateProductQuantity(ICollection<OrderDetail> orderDetails)
         {
             foreach (var detail in orderDetails.Where(detail => detail.MotobikeProduct != null))
