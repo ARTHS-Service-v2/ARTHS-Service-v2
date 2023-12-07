@@ -193,10 +193,7 @@ namespace ARTHS_Service.Implementations
             //    }
             //    booking.StaffId = model.StaffId;
             //}
-            if(!await IsStaffAvailableForBooking(booking.StaffId, booking.DateBook))
-            {
-                throw new ConflictException($"Nhân viên không còn lịch trống trong ngày {booking.DateBook:dd-MM-yyyy}, quý khách vui lòng chọn ngày khác.");
-            }
+            
 
 
             booking.Description = model.Description ?? booking.Description;
@@ -206,12 +203,29 @@ namespace ARTHS_Service.Implementations
             {
                 if(booking.StaffId!= null)
                 {
+                    if (!await IsStaffAvailableForBooking(booking.StaffId, booking.DateBook))
+                    {
+                        throw new ConflictException($"Nhân viên không còn lịch trống trong ngày {booking.DateBook:dd-MM-yyyy}, quý khách vui lòng chọn ngày khác.");
+                    }
+                    if(!await IsStaffAvailableForDate(booking.StaffId, booking.DateBook))
+                    {
+                        throw new ConflictException($"Nhân viên đã có lịch sửa chữa trong khoản thời gian từ {booking.DateBook.AddMinutes(-30):HH\\:mm} đến {booking.DateBook.AddMinutes(30):HH\\:mm}. Xin vui lòng chọn thời gian khác.");
+                    }
                     await SendNotificationBookingToStaff(booking);
                 }
             }
             _repairBookingRepository.Update(booking);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetRepairBooking(repairBookingId) : null!;
+        }
+
+        private async Task<bool> IsStaffAvailableForDate(Guid? staffId, DateTime dateBook)
+        {
+            var existBooking = await _repairBookingRepository.GetMany(booking => booking.StaffId.Equals(staffId) &&
+                                                                                  booking.Status.Equals(RepairBookingStatus.Confirmed) &&
+                                                                                  booking.DateBook < dateBook.AddMinutes(30) &&
+                                                                                  booking.DateBook > dateBook.AddMinutes(-30)).ToListAsync();
+            return existBooking.Count == 0;
         }
 
         private async Task<bool> IsStaffAvailableForBooking(Guid? staffId, DateTime dateBook)
