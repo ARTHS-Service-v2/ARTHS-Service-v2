@@ -49,12 +49,16 @@ namespace ARTHS_Service.Implementations
 
         public async Task<int> CalculateDailyOnlineBookings()
         {
-            var config = await _configurationRepository.GetMany(config => config.Id.Equals("config")).FirstOrDefaultAsync();
-            if (config == null) { throw new BadRequestException(""); }
-
+            var config = await _configurationRepository.GetMany(config => config.Id.Equals("config")).FirstOrDefaultAsync() ?? throw new BadRequestException("");
             int motosPerStaff = config.WorkHours / config.ServiceTime;
             int totalMotosPerDay = motosPerStaff * config.TotalStaff;
             return totalMotosPerDay * (100 - config.NonBookingPercentage) / 100;
+        }
+
+        public async Task<int> CalculateDailyStaffReceivedBookings()
+        {
+            var config = await _configurationRepository.GetMany(config => config.Id.Equals("config")).FirstOrDefaultAsync() ?? throw new BadRequestException("");
+            return config.WorkHours / config.ServiceTime;
         }
     }
 }

@@ -67,7 +67,7 @@ namespace ARTHS_Service.Implementations
             }
             var listBooking = query
                 .ProjectTo<RepairBookingViewModel>(_mapper.ConfigurationProvider)
-                .OrderByDescending(booking => booking.CreateAt);
+                .OrderByDescending(booking => booking.DateBook);
             var bookings = await listBooking.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
             var totalRow = await listBooking.AsNoTracking().CountAsync();
             if (bookings != null || bookings != null && bookings.Any())
@@ -115,12 +115,12 @@ namespace ARTHS_Service.Implementations
             {
                 if (!await IsStaffAvailableForBooking(model.StaffId.Value, dateBook))
                 {
-                    throw new ConflictException($"Nhân viên này đã đủ 5 đơn đặt hàng cho ngày {dateBook:dd-MM-yyyy}. Vui lòng chọn ngày khác hoặc nhân viên khác.");
+                    throw new ConflictException($"Nhân viên không còn lịch trống trong ngày {dateBook:dd-MM-yyyy}, quý khách vui lòng chọn ngày khác hoặc nhân viên khác.");
                 }
             }
             if (!await IsBookingAvailableForDate(dateBook))
             {
-                throw new ConflictException($"Cửa hàng đã đủ đơn cho ngày bạn chọn. Vui lòng chọn ngày khác.");
+                throw new ConflictException($"Ngày {dateBook:dd-MM-yyyy} cửa hàng không còn lịch trống, quý khách vui lòng chọn ngày khác");
             }
 
             var booking = new RepairBooking
@@ -178,7 +178,7 @@ namespace ARTHS_Service.Implementations
                         dateBooking = newDateBook;
                         if (!await IsBookingAvailableForDate(dateBooking))
                         {
-                            throw new ConflictException($"Cửa hàng đã đủ đơn cho ngày bạn chọn. Vui lòng chọn ngày khác.");
+                            throw new ConflictException($"Ngày {dateBooking:dd-MM-yyyy} cửa hàng không còn lịch trống, vui lòng chọn ngày khác.");
                         }
                     }
                 }
@@ -190,7 +190,7 @@ namespace ARTHS_Service.Implementations
             {
                 if (!await IsStaffAvailableForBooking(model.StaffId, booking.DateBook))
                 {
-                    throw new ConflictException($"Nhân viên này đã đủ 5 đơn đặt hàng cho ngày {booking.DateBook:dd-MM-yyyy}. Vui lòng chọn ngày khác hoặc nhân viên khác.");
+                    throw new ConflictException($"Nhân viên không còn lịch trống trong ngày {booking.DateBook:dd-MM-yyyy}, quý khách vui lòng chọn ngày khác.");
                 }
                 booking.StaffId = model.StaffId;
             }
@@ -215,7 +215,7 @@ namespace ARTHS_Service.Implementations
             var countBookingOfStaff = await _repairBookingRepository
                 .GetMany(booking => booking.StaffId.Equals(staffId) && booking.DateBook.Date.Equals(dateBook))
                 .CountAsync();
-            if (countBookingOfStaff.Equals(2))
+            if (countBookingOfStaff.Equals(await _configurationService.CalculateDailyStaffReceivedBookings()))
             {
                 return false;
             }

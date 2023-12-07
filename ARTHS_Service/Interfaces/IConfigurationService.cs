@@ -8,5 +8,6 @@ namespace ARTHS_Service.Interfaces
         Task<ConfigurationViewModel> GetSetting();
         Task<ConfigurationViewModel> UpdateSetting(UpdateConfigurationModel model);
         Task<int> CalculateDailyOnlineBookings();
+        Task<int> CalculateDailyStaffReceivedBookings();
     }
 }

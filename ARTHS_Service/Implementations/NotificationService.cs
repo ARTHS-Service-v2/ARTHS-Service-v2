@@ -147,7 +147,7 @@ namespace ARTHS_Service.Implementations
             {
                 return null!;
             }
-            notification.IsRead = model.IsRead;
+            notification.IsRead = true;
             _notificationRepository.Update(notification);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetNotification(id) : null!;

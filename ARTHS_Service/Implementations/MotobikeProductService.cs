@@ -40,7 +40,7 @@ namespace ARTHS_Service.Implementations
         public async Task<List<BestSellersViewModel>> GetBestSellerMotobikeProducts()
         {
             var bestSellers = await _orderDetailRepository
-                                    .GetAll()
+                                    .GetMany(detail => detail.Order.Status != OrderStatus.Canceled)
                                     .GroupBy(detail => detail.MotobikeProductId)
                                     .Select(product => new
                                     {

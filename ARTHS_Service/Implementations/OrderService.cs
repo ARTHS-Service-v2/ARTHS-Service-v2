@@ -296,7 +296,7 @@ namespace ARTHS_Service.Implementations
 
                 if (model.Status.Equals(OrderStatus.WaitForPay))
                 {
-                    await ChangeStatusOfStaff(order.StaffId);
+                    await ChangeStatusOfStaff(order.StaffId, UserStatus.Active);
                     await SendNotificationToTellers(order);
                 }
 
@@ -308,7 +308,7 @@ namespace ARTHS_Service.Implementations
                 order.Status = model.Status;
             }
 
-            order.StaffId = model.StaffId ?? order.StaffId;
+            //order.StaffId = model.StaffId ?? order.StaffId;
             order.CustomerName = model.CustomerName ?? order.CustomerName;
             order.CustomerPhoneNumber = model.CustomerPhone ?? order.CustomerPhoneNumber;
             order.LicensePlate = model.LicensePlate ?? order.LicensePlate;
@@ -317,7 +317,27 @@ namespace ARTHS_Service.Implementations
                 order.TotalAmount = await CreateOrderOfflineDetail(Id, model.OrderDetailModel, true);
                 if (!ShouldAddStaffToOrder(model.OrderDetailModel))
                 {
+                    if(order.StaffId != null)
+                    {
+                        await ChangeStatusOfStaff(order.StaffId, UserStatus.Active);
+                    }
                     order.StaffId = null;
+                }
+                else
+                {
+                    if (!model.StaffId.Equals(order.StaffId))
+                    {
+                        await ChangeStatusOfStaff(order.StaffId, UserStatus.Active);
+
+                        if (!model.StaffId.HasValue) throw new BadRequestException("Vui lòng chọn nhân viên");
+                        var staff = await _accountRepository.GetMany(staff => staff.Id.Equals(model.StaffId)).FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy nhân viên");
+                        if (staff.Status.Equals(UserStatus.Busy)) throw new ConflictException("Nhân viên đang bận vui lòng chọn nhân viên khác");
+                        order.StaffId = model.StaffId;
+                        staff.Status = UserStatus.Busy;
+
+                        _accountRepository.Update(staff);
+                        await SendNotificationToStaff(order);
+                    }
                 }
             }
 
@@ -343,10 +363,10 @@ namespace ARTHS_Service.Implementations
             }
         }
 
-        private async Task ChangeStatusOfStaff(Guid? staffId)
+        private async Task ChangeStatusOfStaff(Guid? staffId, string status)
         {
             var staff = await _accountRepository.GetMany(staff => staff.Id.Equals(staffId)).FirstOrDefaultAsync();
-            staff!.Status = UserStatus.Active;
+            staff!.Status = status;
             _accountRepository.Update(staff);
         }
 
