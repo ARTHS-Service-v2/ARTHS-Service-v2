@@ -88,7 +88,8 @@ namespace ARTHS_Service.Implementations
             }).ToArray();
 
             var embed_data = new {
-                merchantinfo = "Thanh Huy Motorbike"
+                merchantinfo = "Thanh Huy Motorbike",
+                redirecturl= $"https://thanh-huy-motorbike.vercel.app/manage-order/{model.OrderId}"
             };
             DateTime now = DateTime.UtcNow.AddHours(7);
             string AppTransId = now.ToString("yyMMddHHmmssfff") + "_" + model.OrderId;
