@@ -13,6 +13,6 @@ namespace ARTHS_Service.Interfaces
         Task<RepairServiceViewModel> CreateRepairService(CreateRepairServiceModel model);
         Task<RepairServiceViewModel> UpdateRepairService(Guid id, UpdateRepairServiceModel model);
         Task<RepairServiceViewModel> UpdateRepairServiceImage(Guid repairServiceId, UpdateImageModel model);
-        Task RemoveRepairServieImage(Guid imageId);
+        Task RemoveRepairServieImage(List<Guid> imageId);
     }
 }

@@ -56,7 +56,7 @@ namespace ARTHS_Service.Implementations
                 var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(seller.MotobikeProductId))
                     .ProjectTo<MotobikeProductDetailViewModel>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
-                if(product != null)
+                if (product != null)
                 {
                     bestSellerProducts.Add(new BestSellersViewModel
                     {
@@ -139,7 +139,7 @@ namespace ARTHS_Service.Implementations
                 baseQuery = baseQuery.OrderByDescending(p => p.CreateAt);
             }
 
-            
+
 
             var totalRow = await baseQuery.AsNoTracking().CountAsync();
             var paginatedQuery = baseQuery
@@ -173,7 +173,7 @@ namespace ARTHS_Service.Implementations
         public async Task<MotobikeProductDetailViewModel> CreateMotobikeProduct(CreateMotobikeProductModel model)
         {
             var imageCount = model.Images.Count();
-            
+
             if (imageCount < 1 || imageCount > 4)
             {
                 throw new BadRequestException("Phải có ít nhất một hình để tạo và không được quá 4 hình.");
@@ -243,41 +243,49 @@ namespace ARTHS_Service.Implementations
             {
                 CreateMotobikeProductPrice(id, (int)model.PriceCurrent);
             }
-           
-            motobikeProduct.Name = model.Name ?? motobikeProduct.Name;
-            motobikeProduct.Description = model.Description ?? motobikeProduct.Description;
-            motobikeProduct.Status = model.Status ?? motobikeProduct.Status;
-            motobikeProduct.DiscountId = model.DiscountId ?? motobikeProduct.DiscountId;
-            motobikeProduct.WarrantyId = model.WarrantyId ?? motobikeProduct.WarrantyId;
-            motobikeProduct.CategoryId = model.CategoryId ?? motobikeProduct.CategoryId;
-            motobikeProduct.InstallationFee = model.InstallationFee ?? motobikeProduct.InstallationFee;
-            motobikeProduct.UpdateAt = DateTime.Now;
 
-            //motobikeProduct.Quantity = model.Quantity ?? motobikeProduct.Quantity;
-            if (model.Quantity.HasValue)
+            if (!string.IsNullOrEmpty(model.Status))
             {
-                motobikeProduct.Quantity = model.Quantity.Value;
-                if (motobikeProduct.Quantity.Equals(0) && !motobikeProduct.Status.Equals(ProductStatus.Discontinued))
+                motobikeProduct.Status = model.Status;
+            }
+            else
+            {
+                motobikeProduct.Name = model.Name ?? motobikeProduct.Name;
+                motobikeProduct.Description = model.Description ?? motobikeProduct.Description;
+                motobikeProduct.DiscountId = model.DiscountId ?? motobikeProduct.DiscountId;
+                motobikeProduct.WarrantyId = model.WarrantyId;
+                motobikeProduct.CategoryId = model.CategoryId ?? motobikeProduct.CategoryId;
+                motobikeProduct.InstallationFee = model.InstallationFee ?? motobikeProduct.InstallationFee;
+                motobikeProduct.UpdateAt = DateTime.Now;
+
+                //motobikeProduct.Quantity = model.Quantity ?? motobikeProduct.Quantity;
+                if (model.Quantity.HasValue)
                 {
-                    motobikeProduct.Status = ProductStatus.OutOfStock;
+                    motobikeProduct.Quantity = model.Quantity.Value;
+                    if (motobikeProduct.Quantity.Equals(0) && !motobikeProduct.Status.Equals(ProductStatus.Discontinued))
+                    {
+                        motobikeProduct.Status = ProductStatus.OutOfStock;
+                    }
+                    else if (!motobikeProduct.Status.Equals(ProductStatus.Discontinued))
+                    {
+                        motobikeProduct.Status = ProductStatus.Active;
+                    }
                 }
-                else if(!motobikeProduct.Status.Equals(ProductStatus.Discontinued))
+
+                if (model.VehiclesId != null && model.VehiclesId.Count > 0)
                 {
-                    motobikeProduct.Status = ProductStatus.Active;
+                    var vehicles = await _vehicleRepository.GetMany(vehicle => model.VehiclesId.Contains(vehicle.Id)).ToListAsync();
+                    if (vehicles.Count == 0)
+                    {
+                        throw new BadRequestException("Vui lòng nhập lại vehicle id.");
+                    }
+
+                    motobikeProduct.Vehicles.Clear();
+                    motobikeProduct.Vehicles = vehicles;
                 }
             }
 
-            if (model.VehiclesId != null && model.VehiclesId.Count > 0)
-            {
-                var vehicles = await _vehicleRepository.GetMany(vehicle => model.VehiclesId.Contains(vehicle.Id)).ToListAsync();
-                if (vehicles.Count == 0)
-                {
-                    throw new BadRequestException("Vui lòng nhập lại vehicle id.");
-                }
 
-                motobikeProduct.Vehicles.Clear();
-                motobikeProduct.Vehicles = vehicles;
-            }
 
             _motobikeProductRepository.Update(motobikeProduct);
             var result = await _unitOfWork.SaveChanges();
@@ -319,35 +327,47 @@ namespace ARTHS_Service.Implementations
 
         public async Task<MotobikeProductDetailViewModel> UpdateMotobikeProductImage(Guid motobikeProductId, UpdateImageModel model)
         {
-            if (!model.Image.ContentType.StartsWith("image/"))
+            if (model.Images.Count < 1 || model.Images.Count > 4)
             {
-                throw new BadRequestException("file không phải là hình ảnh");
+                throw new BadRequestException("Phải có ít nhất một hình để tạo và không được quá 4 hình.");
             }
-            var imageId = Guid.NewGuid();
-            var url = await _cloudStorageService.Upload(imageId, model.Image.ContentType, model.Image.OpenReadStream());
-            var newImage = new Image
+
+
+            foreach (var image in model.Images)
             {
-                Id = imageId,
-                MotobikeProductId = motobikeProductId,
-                ImageUrl = url
-            };
-            _imageRepository.Add(newImage);
+                if (!image.ContentType.StartsWith("image/"))
+                {
+                    throw new BadRequestException("file không phải là hình ảnh");
+                }
+                var imageId = Guid.NewGuid();
+                var url = await _cloudStorageService.Upload(imageId, image.ContentType, image.OpenReadStream());
+                var newImage = new Image
+                {
+                    Id = imageId,
+                    MotobikeProductId = motobikeProductId,
+                    ImageUrl = url
+                };
+                _imageRepository.Add(newImage);
+                
+            }
             return await _unitOfWork.SaveChanges() > 0 ? await GetMotobikeProduct(motobikeProductId) : null!;
         }
 
-        public async Task RemoveMotobikeProductImage(Guid imageId)
+        public async Task RemoveMotobikeProductImage(List<Guid> imageIds)
         {
-            var existImage = await _imageRepository.GetMany(image => image.Id.Equals(imageId)).FirstOrDefaultAsync();
-            if (existImage != null)
+            if (imageIds.Count != 0)
             {
-                await _cloudStorageService.Delete(imageId);
-                _imageRepository.Remove(existImage);
+                foreach (var imageId in imageIds)
+                {
+                    var existImage = await _imageRepository.GetMany(image => image.Id.Equals(imageId)).FirstOrDefaultAsync();
+                    if (existImage != null)
+                    {
+                        await _cloudStorageService.Delete(imageId);
+                        _imageRepository.Remove(existImage);
 
-                await _unitOfWork.SaveChanges();
-            }
-            else
-            {
-                throw new NotFoundException("Không tìm thấy image");
+                        await _unitOfWork.SaveChanges();
+                    }
+                }
             }
         }
     }

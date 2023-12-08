@@ -90,13 +90,13 @@ namespace ARTHS_API.Controllers
 
         [HttpDelete]
         [Authorize(UserRole.Owner)]
-        [Route("image/{id}")]
+        [Route("image")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Remove motobike product image.")]
-        public async Task<IActionResult> Remove([FromRoute] Guid id)
+        public async Task<IActionResult> Remove([FromForm] List<Guid> ids)
         {
-            await _motobikeProductService.RemoveMotobikeProductImage(id);
+            await _motobikeProductService.RemoveMotobikeProductImage(ids);
             return NoContent();
         }
     }

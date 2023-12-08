@@ -14,6 +14,6 @@ namespace ARTHS_Service.Interfaces
         Task<MotobikeProductDetailViewModel> CreateMotobikeProduct(CreateMotobikeProductModel model);
         Task<MotobikeProductDetailViewModel> UpdateMotobikeProduct(Guid id, UpdateMotobikeProductModel model);
         Task<MotobikeProductDetailViewModel> UpdateMotobikeProductImage(Guid motobikeProductId, UpdateImageModel model);
-        Task RemoveMotobikeProductImage(Guid imageId);
+        Task RemoveMotobikeProductImage(List<Guid> imageIds);
     }
 }

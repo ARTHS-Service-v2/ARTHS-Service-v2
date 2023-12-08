@@ -180,20 +180,20 @@ namespace ARTHS_Service.Implementations
                 throw new NotFoundException("Không tìm thấy repair service.");
             }
 
-
-
-            repairService.Name = model.Name ?? repairService.Name;
-            repairService.Price = model.Price ?? repairService.Price;
-            repairService.Duration = model.Duration ?? repairService.Duration;
-            repairService.WarrantyDuration = model.WarrantyDuration ?? repairService.WarrantyDuration;
-            repairService.DiscountId = model.DiscountId ?? repairService.DiscountId;
-            repairService.ReminderInterval = model.ReminderInterval ?? repairService.ReminderInterval;
-            repairService.Description = model.Description ?? repairService.Description;
-            repairService.Status = model.Status ?? repairService.Status;
-
-
-
-
+            if (!string.IsNullOrEmpty(model.Status))
+            {
+                repairService.Status = model.Status;
+            }
+            else
+            {
+                repairService.Name = model.Name ?? repairService.Name;
+                repairService.Price = model.Price ?? repairService.Price;
+                repairService.Duration = model.Duration ?? repairService.Duration;
+                repairService.WarrantyDuration = model.WarrantyDuration ?? repairService.WarrantyDuration;
+                repairService.DiscountId = model.DiscountId ?? repairService.DiscountId;
+                repairService.ReminderInterval = model.ReminderInterval;
+                repairService.Description = model.Description ?? repairService.Description;
+            }
             _repairRepository.Update(repairService);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetRepairService(id) : null!;
@@ -265,35 +265,44 @@ namespace ARTHS_Service.Implementations
 
         public async Task<RepairServiceViewModel> UpdateRepairServiceImage(Guid repairServiceId, UpdateImageModel model)
         {
-            if (!model.Image.ContentType.StartsWith("image/"))
+            if (model.Images.Count < 1 || model.Images.Count > 4)
             {
-                throw new BadRequestException("file không phải là hình ảnh");
+                throw new BadRequestException("Phải có ít nhất một hình để tạo và không được quá 4 hình.");
             }
-            var imageId = Guid.NewGuid();
-            var url = await _cloudStorageService.Upload(imageId, model.Image.ContentType, model.Image.OpenReadStream());
-            var newImage = new Image
+            foreach (var image in model.Images)
             {
-                Id = imageId,
-                RepairServiceId = repairServiceId,
-                ImageUrl = url
-            };
-            _imageRepository.Add(newImage);
+                if (!image.ContentType.StartsWith("image/"))
+                {
+                    throw new BadRequestException("file không phải là hình ảnh");
+                }
+                var imageId = Guid.NewGuid();
+                var url = await _cloudStorageService.Upload(imageId, image.ContentType, image.OpenReadStream());
+                var newImage = new Image
+                {
+                    Id = imageId,
+                    RepairServiceId = repairServiceId,
+                    ImageUrl = url
+                };
+                _imageRepository.Add(newImage);
+            }
             return await _unitOfWork.SaveChanges() > 0 ? await GetRepairService(repairServiceId) : null!;
         }
 
-        public async Task RemoveRepairServieImage(Guid imageId)
+        public async Task RemoveRepairServieImage(List<Guid> imageIds)
         {
-            var existImage = await _imageRepository.GetMany(image => image.Id.Equals(imageId)).FirstOrDefaultAsync();
-            if (existImage != null)
+            if (imageIds.Count != 0)
             {
-                await _cloudStorageService.Delete(imageId);
-                _imageRepository.Remove(existImage);
+                foreach (var imageId in imageIds)
+                {
+                    var existImage = await _imageRepository.GetMany(image => image.Id.Equals(imageId)).FirstOrDefaultAsync();
+                    if (existImage != null)
+                    {
+                        await _cloudStorageService.Delete(imageId);
+                        _imageRepository.Remove(existImage);
 
-                await _unitOfWork.SaveChanges();
-            }
-            else
-            {
-                throw new NotFoundException("Không tìm thấy image");
+                        await _unitOfWork.SaveChanges();
+                    }
+                }
             }
         }
     }
