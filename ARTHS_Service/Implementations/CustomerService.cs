@@ -75,8 +75,8 @@ namespace ARTHS_Service.Implementations
                     _cartRepository.Add(cart);
 
                     result = await _unitOfWork.SaveChanges();
+                    await _smsService.SendSmsAsync(model.PhoneNumber, otp);
                     transaction.Commit();
-
                 }
                 catch (Exception)
                 {
@@ -84,7 +84,7 @@ namespace ARTHS_Service.Implementations
                     throw;
                 }
             };
-            await _smsService.SendSmsAsync(model.PhoneNumber, otp);
+            
             return result > 0 ? await GetCustomer(accountId) : null!;
         }
 
