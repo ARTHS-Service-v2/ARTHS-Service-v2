@@ -24,5 +24,11 @@
         public string QueryOrderUrl { get; set; } = null!;
         public string CallbackUrl { get; set; } = null!;
 
+        //twilio
+        public string AccountSid { get; set; } = null!;
+        public string AuthToken { get; set; } = null!;
+        public string PhoneNumber { get; set; } = null!;
+
+
     }
 }

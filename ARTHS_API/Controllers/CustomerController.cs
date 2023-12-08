@@ -68,6 +68,18 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpPut]
+        [Route("activate")]
+        [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "OTP to activate account.")]
+        public async Task<ActionResult<CustomerViewModel>> ActiveCustomer([FromBody] ActivateCustomerModel model)
+        {
+            var customer = await _customerService.ActiveCustomer(model);
+            return CreatedAtAction(nameof(GetCustomer), new { id = customer.AccountId }, customer);
+        }
+
+        [HttpPut]
         [Route("avatar")]
         [Authorize(UserRole.Customer)]
         [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status201Created)]

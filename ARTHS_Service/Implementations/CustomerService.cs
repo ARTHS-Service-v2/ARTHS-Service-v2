@@ -22,14 +22,16 @@ namespace ARTHS_Service.Implementations
 
         private readonly IAccountService _accountService;
         private readonly ICloudStorageService _cloudStorageService;
+        private readonly ISmsService _smsService;
 
 
-        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService, IAccountService accountService) : base(unitOfWork, mapper)
+        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService, IAccountService accountService, ISmsService smsService) : base(unitOfWork, mapper)
         {
             _customerRepository = unitOfWork.Customer;
             _cartRepository = unitOfWork.Cart;
             _cloudStorageService = cloudStorageService;
             _accountService = accountService;
+            _smsService = smsService;
         }
 
 
@@ -45,13 +47,14 @@ namespace ARTHS_Service.Implementations
         {
             var result = 0;
             var accountId = Guid.Empty;
+            var otp = GenerateOtp();
             using (var transaction = _unitOfWork.Transaction())
             {
                 try
                 {
                     //create account
                     accountId = await _accountService.CreateAccount(model.PhoneNumber, model.Password, UserRole.Customer);
-
+                    
                     //create customer
                     var customer = new CustomerAccount
                     {
@@ -59,6 +62,7 @@ namespace ARTHS_Service.Implementations
                         FullName = model.FullName,
                         Gender = model.Gender,
                         Address = model.Address,
+                        Otp = otp,
                     };
                     _customerRepository.Add(customer);
 
@@ -80,7 +84,25 @@ namespace ARTHS_Service.Implementations
                     throw;
                 }
             };
+            await _smsService.SendSmsAsync(model.PhoneNumber, otp);
             return result > 0 ? await GetCustomer(accountId) : null!;
+        }
+
+        public async Task<CustomerViewModel> ActiveCustomer(ActivateCustomerModel model)
+        {
+            var customer = await _customerRepository.GetMany(customer => customer.Account.PhoneNumber.Equals(model.PhoneNumber) && customer.Account.Status.Equals(UserStatus.Pending))
+                                                .Include(customer => customer.Account)
+                                                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy customer");
+            if (!customer.Otp!.Equals(model.Otp))
+            {
+                throw new BadRequestException("Mã OTP không chính sát.");
+            }
+
+            customer.Account.Status = UserStatus.Active;
+            
+            _customerRepository.Update(customer);
+            var result = await _unitOfWork.SaveChanges();
+            return result > 0 ? await GetCustomer(customer.AccountId) : null!;
         }
 
         public async Task<CustomerViewModel> UpdateCustomer(Guid id, UpdateCustomerModel model)
@@ -137,6 +159,25 @@ namespace ARTHS_Service.Implementations
             }
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetCustomer(id) : null!;
+        }
+
+
+        private string GenerateOtp()
+        {
+            int otpLength = 6;
+            string numbers = "0123456789";
+
+            Random random = new Random();
+            char[] otpArray = new char[otpLength];
+
+            for (int i = 0; i < otpLength; i++)
+            {
+                otpArray[i] = numbers[random.Next(numbers.Length)];
+            }
+
+            string otp = new(otpArray);
+
+            return otp;
         }
     }
 }

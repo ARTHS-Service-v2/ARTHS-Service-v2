@@ -198,8 +198,17 @@ namespace ARTHS_Service.Implementations
                 PhoneNumber = phoneNumber,
                 PasswordHash = passwordHash,
                 RoleId = accountRole.Id,
-                Status = UserStatus.Active
+                //Status = UserStatus.Active
             };
+            if (accountRole.RoleName.Equals(UserRole.Customer))
+            {
+                account.Status = UserStatus.Pending;
+            }
+            else
+            {
+                account.Status = UserStatus.Active;
+            }
+
             _accountRepository.Add(account);
 
             var result = await _unitOfWork.SaveChanges();

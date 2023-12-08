@@ -169,6 +169,10 @@ namespace ARTHS_Data.Entities
 
                 entity.Property(e => e.Gender).HasMaxLength(10);
 
+                entity.Property(e => e.Otp)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
                 entity.HasOne(d => d.Account)
                     .WithOne(p => p.CustomerAccount)
                     .HasForeignKey<CustomerAccount>(d => d.AccountId)

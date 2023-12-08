@@ -9,6 +9,7 @@ namespace ARTHS_Service.Interfaces
     {
         Task<CustomerViewModel> GetCustomer(Guid id);
         Task<CustomerViewModel> CreateCustomer(RegisterCustomerModel model);
+        Task<CustomerViewModel> ActiveCustomer(ActivateCustomerModel model);
         Task<CustomerViewModel> UpdateCustomer(Guid id, UpdateCustomerModel model);
         Task<CustomerViewModel> UploadAvatar(Guid id, IFormFile image);
     }

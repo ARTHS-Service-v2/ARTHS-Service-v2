@@ -29,7 +29,7 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IMotobikeProductService, MotobikeProductService>();
 
             services.AddScoped<ICartService, CartService>();
-
+            services.AddScoped<ISmsService, TwilioSmsService>();
             services.AddScoped<IWarrantyService, WarrantyService>();
             //services.AddScoped<IVNPayService, PaymentService>();
             services.AddScoped<IRevenueStoreService, RevenueStoreService>();

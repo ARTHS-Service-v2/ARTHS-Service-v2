@@ -19,6 +19,7 @@ namespace ARTHS_Data.Entities
         public string Gender { get; set; } = null!;
         public string? Avatar { get; set; }
         public string Address { get; set; } = null!;
+        public string? Otp { get; set; }
 
         public virtual Account Account { get; set; } = null!;
         public virtual Cart? Cart { get; set; }
