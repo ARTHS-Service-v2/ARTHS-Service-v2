@@ -72,10 +72,6 @@ namespace ARTHS_Data.Repositories.Implementations
 
             if (detail.MotobikeProductId.HasValue)
             {
-                if (!detail.InstUsed)
-                {
-                    throw new ConflictException("Đơn hàng này bạn không dùng dịch vụ lắp đặt bên chúng tôi.");
-                }
                 if (detail.Quantity < model.ProductQuantity)
                 {
                     throw new ConflictException("Số lượng sản phẩm bảo hành không được lớn hơn số sản phẩm đã mua.");
