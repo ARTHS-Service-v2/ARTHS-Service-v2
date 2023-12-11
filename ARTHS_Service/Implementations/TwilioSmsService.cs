@@ -20,11 +20,12 @@ namespace ARTHS_Service.Implementations
         {
             try
             {
+                var phoneNumber = int.Parse(toPhoneNumber);
                 TwilioClient.Init(_appSettings.AccountSid, _appSettings.AuthToken);
                 var message = await MessageResource.CreateAsync(
                    body: $"Mã OTP xác thực tài khoản cửa hàng Thanh Huy của bạn : {otp}",
                    from: new Twilio.Types.PhoneNumber(_appSettings.PhoneNumber),
-                   to: new Twilio.Types.PhoneNumber("+84" + toPhoneNumber));
+                   to: new Twilio.Types.PhoneNumber("+84" + phoneNumber));
 
                 return true;
             }catch (Exception)

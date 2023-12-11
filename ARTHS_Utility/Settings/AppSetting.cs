@@ -29,6 +29,9 @@
         public string AuthToken { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
 
+        //AzureStorage
+        public string AccessKeyConnection { get; set; } = null!;
+        public string ContainerName { get; set; } = null!;
 
     }
 }

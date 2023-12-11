@@ -1,7 +1,5 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
-using System.Net;
-using System.Reflection;
 
 namespace ARTHS_Utility.Helpers
 {

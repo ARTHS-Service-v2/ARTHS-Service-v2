@@ -219,6 +219,24 @@ namespace ARTHS_Service.Implementations
             return result > 0 ? await GetRepairBooking(repairBookingId) : null!;
         }
 
+        public async Task AutoCancelBooking()
+        {
+            var bookings = await _repairBookingRepository.GetMany(booking => booking.Status.Equals(RepairBookingStatus.Confirmed) && booking.DateBook.Date <= DateTime.UtcNow.AddHours(7).Date).ToListAsync();
+            if(bookings.Count == 0)
+            {
+                return;
+            }
+            foreach( var booking in bookings)
+            {
+                booking.Status = RepairBookingStatus.Canceled;
+                booking.CancellationReason = "Khách hàng không đến.";
+                booking.CancellationDate = DateTime.UtcNow.AddHours(7);
+                //_repairBookingRepository.Update( booking );
+            }
+            _repairBookingRepository.UpdateRange(bookings);
+            await _unitOfWork.SaveChanges();
+        }
+
         private async Task<bool> IsStaffAvailableForDate(Guid? staffId, DateTime dateBook)
         {
             var existBooking = await _repairBookingRepository.GetMany(booking => booking.StaffId.Equals(staffId) &&

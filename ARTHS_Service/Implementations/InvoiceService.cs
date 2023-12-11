@@ -2,11 +2,13 @@
 using ARTHS_Data.Entities;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Settings;
 using AutoMapper;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
 using PdfSharp.Pdf;
@@ -17,9 +19,11 @@ namespace ARTHS_Service.Implementations
     public class InvoiceService : BaseService, IInvoiceService
     {
         private readonly IOrderRepository _orderRepository;
-        public InvoiceService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        private readonly AppSetting _appSetting;
+        public InvoiceService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> settings) : base(unitOfWork, mapper)
         {
             _orderRepository = unitOfWork.Order;
+            _appSetting = settings.Value;
         }
 
         public async Task<string> GenerateInvoice(string orderId)
@@ -74,9 +78,9 @@ namespace ARTHS_Service.Implementations
 
 
                 // Lưu tệp PDF vào Blob Storage
-                var blobServiceClient = new BlobServiceClient("DefaultEndpointsProtocol=https;AccountName=arthsbillstoragev2;AccountKey=JSzefye9lskpFZ25QFkJMZiC71TLowm+EpRcEA9wPIW2kXXhIsGDUeFF3OXIN3v0Sds9L5SpAYv6+ASt4ZaHYA==;EndpointSuffix=core.windows.net"); // Thay thế bằng Connection String thực tế
-                var containerClient = blobServiceClient.GetBlobContainerClient("arthsbill");
-                var blobClient = containerClient.GetBlobClient($"{orderId}.pdf");
+                var blobServiceClient = new BlobServiceClient(_appSetting.AccessKeyConnection);
+                var containerClient = blobServiceClient.GetBlobContainerClient(_appSetting.ContainerName);
+                var blobClient = containerClient.GetBlobClient($"{orderId}_{DateTime.Now:yyyyMMddHHmmss}.pdf");
 
                 await using (var ms = new MemoryStream())
                 {

@@ -3,6 +3,7 @@ using ARTHS_Data.Entities;
 using ARTHS_Data.Mapping;
 using ARTHS_Utility.Helpers.Fonts;
 using ARTHS_Utility.Settings;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -16,7 +17,7 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.Configure<AppSetting>(builder.Configuration.GetSection("AppSetting"));
 builder.Services.AddDbContext<ARTHS_DBContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!));
 
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews()
@@ -40,8 +41,6 @@ builder.Services.AddCors(options =>
                           policy.WithOrigins(
                               "http://127.0.0.1:5173",
                               "https://thanh-huy-motorbike.vercel.app");
-                          //    "https://egift-d50fc.web.app",
-                          //"https://egiftadmin-add56.web.app");
                           policy.AllowCredentials();
                       });
 });

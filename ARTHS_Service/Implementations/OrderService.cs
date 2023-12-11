@@ -475,7 +475,7 @@ namespace ARTHS_Service.Implementations
                 {
                     Id = Guid.NewGuid(),
                     OrderId = orderId,
-                    WarrantyStartDate = DateTime.UtcNow.AddHours(7)
+                    //WarrantyStartDate = DateTime.UtcNow.AddHours(7)
                 };
 
                 if (detail.MotobikeProductId.HasValue)
@@ -510,11 +510,15 @@ namespace ARTHS_Service.Implementations
                     {
                         orderDetail.InstUsed = detail.InstUsed.GetValueOrDefault(true);
                         detailPrice += product.InstallationFee;
-
-                        orderDetail.WarrantyEndDate = product.Warranty != null ? DateTime.UtcNow.AddMonths(product.Warranty.Duration) : null;
                     }
 
-                   
+                    if(product.Warranty != null)
+                    {
+                        orderDetail.WarrantyStartDate = DateTime.UtcNow.AddHours(7);
+                        orderDetail.WarrantyEndDate = DateTime.UtcNow.AddHours(7).AddMonths(product.Warranty.Duration);
+                    }
+
+                    //orderDetail.WarrantyEndDate = product.Warranty != null ? DateTime.UtcNow.AddMonths(product.Warranty.Duration) : null;
                 }
                 else if (detail.RepairServiceId.HasValue)
                 {
@@ -531,7 +535,12 @@ namespace ARTHS_Service.Implementations
                     orderDetail.RepairServiceId = detail.RepairServiceId;
                     orderDetail.Price = servicePrice;
 
-                    orderDetail.WarrantyEndDate = repairService.WarrantyDuration == 0 ? null : DateTime.UtcNow.AddHours(7).AddMonths(repairService.WarrantyDuration);
+                    if (!repairService.WarrantyDuration.Equals(0))
+                    {
+                        orderDetail.WarrantyStartDate = DateTime.UtcNow.AddHours(7);
+                        orderDetail.WarrantyEndDate = DateTime.UtcNow.AddHours(7).AddMonths(repairService.WarrantyDuration);
+                    }
+                    //orderDetail.WarrantyEndDate = repairService.WarrantyDuration == 0 ? null : DateTime.UtcNow.AddHours(7).AddMonths(repairService.WarrantyDuration);
                 }
 
                 orderDetail.SubTotalAmount = detailPrice;
@@ -628,6 +637,13 @@ namespace ARTHS_Service.Implementations
                 orderDetail.MotobikeProductId = detail.MotobikeProductId;
                 orderDetail.Quantity = detail.ProductQuantity;
                 orderDetail.SubTotalAmount = detailPrice;
+                
+                if(product.Warranty != null)
+                {
+                    orderDetail.WarrantyStartDate = DateTime.UtcNow.AddHours(7);
+                    orderDetail.WarrantyEndDate = DateTime.UtcNow.AddHours(7).AddMonths(product.Warranty.Duration);
+                }
+                //orderDetail.WarrantyEndDate = product.Warranty != null ? DateTime.UtcNow.AddHours(7).AddMonths(product.Warranty.Duration) : null;
 
                 _orderDetailRepository.Add(orderDetail);
 

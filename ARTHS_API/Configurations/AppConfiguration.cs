@@ -152,7 +152,13 @@ namespace ARTHS_API.Configurations
                 () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IDiscountService>().CheckDicounts(),
                 "0 17 * * *"
             );
-            
+            recurringJobManager.AddOrUpdate(
+                "CancelBooking",
+                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IBookingService>().AutoCancelBooking(),
+                "0 16 * * *"
+            );
+
+
         }
     }
 }
