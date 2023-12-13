@@ -141,6 +141,7 @@ namespace ARTHS_Service.Implementations
         private async Task CheckCustomerBooking(Guid customerId, DateTime dateBook)
         {
             var booking = await _repairBookingRepository.GetMany(booking =>
+                                !booking.Status.Equals(RepairBookingStatus.Canceled) &&
                                 booking.CustomerId.Equals(customerId) &&
                                 booking.DateBook.Date.Equals(dateBook.Date))
                 .FirstOrDefaultAsync();
