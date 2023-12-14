@@ -16,13 +16,13 @@ namespace ARTHS_API.Controllers
 {
     [Route("api/notifications")]
     [ApiController]
-    public class NotificationsContronller : ControllerBase
+    public class NotificationsController : ControllerBase
     {
 
         private readonly INotificationService _notificationService;
         //private readonly IDeviceTokenRepository _deviceTokenRepository;
 
-        public NotificationsContronller(INotificationService notificationService)
+        public NotificationsController(INotificationService notificationService)
         {
             _notificationService = notificationService;
         }

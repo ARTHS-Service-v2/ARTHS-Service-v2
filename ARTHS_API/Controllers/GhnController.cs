@@ -1,4 +1,6 @@
-﻿using ARTHS_Service.Interfaces;
+﻿using ARTHS_API.Configurations.Middleware;
+using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Constants;
 using ARTHS_Utility.Helpers;
 using ARTHS_Utility.Helpers.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +21,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPost]
         [Route("transfer-order")]
+        [Authorize(UserRole.Teller)]
         [ProducesResponseType(typeof(GhnCreateResponseModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

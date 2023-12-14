@@ -1,7 +1,9 @@
-﻿using ARTHS_Data.Models.Requests.Filters;
+﻿using ARTHS_API.Configurations.Middleware;
+using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ARTHS_API.Controllers
@@ -25,6 +27,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpPost]
+        [Authorize(UserRole.Teller)]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         public async Task<ActionResult<string>> SendMaintenanceReminders([FromQuery] Guid maintenanceSheduleId)
         {

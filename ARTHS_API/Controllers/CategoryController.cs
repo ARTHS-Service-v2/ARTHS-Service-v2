@@ -1,8 +1,10 @@
-﻿using ARTHS_Data.Models.Requests.Filters;
+﻿using ARTHS_API.Configurations.Middleware;
+using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -53,6 +55,7 @@ namespace ARTHS_API.Controllers
 
         
         [HttpPost]
+        [Authorize(UserRole.Owner)]
         [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Create category.")]
         public async Task<ActionResult<CategoryViewModel>> CreateCategory([FromBody] CreateCategoryRequest request)
@@ -70,6 +73,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [Authorize(UserRole.Owner)]
         [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Update category.")]
         public async Task<IActionResult> UpdateCategory([FromRoute] Guid id,
@@ -88,6 +92,7 @@ namespace ARTHS_API.Controllers
 
         [HttpDelete]
         [Route("{id}")]
+        [Authorize(UserRole.Owner)]
         [SwaggerOperation(Summary = "Delete category.")]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {

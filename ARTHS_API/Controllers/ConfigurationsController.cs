@@ -1,6 +1,8 @@
-﻿using ARTHS_Data.Models.Requests.Put;
+﻿using ARTHS_API.Configurations.Middleware;
+using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Constants;
 using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -27,6 +29,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpPut]
+        [Authorize(UserRole.Owner)]
         [ProducesResponseType(typeof(ConfigurationViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update settings.")]

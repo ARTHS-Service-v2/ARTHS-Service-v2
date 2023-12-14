@@ -103,6 +103,10 @@ namespace ARTHS_Service.Implementations
 
         public async Task<TellerViewModel> UploadAvatar(Guid id, IFormFile image)
         {
+            if (!image.ContentType.StartsWith("image/"))
+            {
+                throw new BadRequestException("File không phải là hình ảnh");
+            }
             var teller = await _tellerRepository.GetMany(teller => teller.AccountId.Equals(id)).FirstOrDefaultAsync();
             if (teller != null)
             {

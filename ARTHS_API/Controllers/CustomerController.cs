@@ -38,7 +38,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get customer by id.")]
         public async Task<ActionResult<CustomerViewModel>> GetCustomer([FromRoute] Guid id)
         {
@@ -58,6 +58,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [Authorize(UserRole.Customer, UserRole.Admin)]
         [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update customer.")]
