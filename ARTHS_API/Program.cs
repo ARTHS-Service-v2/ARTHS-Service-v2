@@ -46,7 +46,7 @@ builder.Services.AddCors(options =>
 });
 
 //--
-//builder.Services.AddHangfireServices(builder.Configuration);
+builder.Services.AddHangfireServices(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwagger();
@@ -68,10 +68,10 @@ app.UseSwaggerUI();
 app.UseJwt();
 
 //--
-//app.AddHangfireDashboard();
+app.AddHangfireDashboard();
 // Đăng ký các công việc định kỳ của Hangfire
-//var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
-//app.Services.AddHangfireJobs(recurringJobManager);
+var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+app.Services.AddHangfireJobs(recurringJobManager);
 
 
 
