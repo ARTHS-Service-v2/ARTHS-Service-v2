@@ -57,7 +57,7 @@ namespace ARTHS_API.Configurations
                     Description = @"APIs for Application to manage motorbikes accessories and repair business of Thanh Huy store in Ho Chi Minh City.
                         <br/>
                         <br/>
-                        <strong>WebApp:</strong> <a href='https://webapp.thanhhuystore.com' target='_blank'>https://webapp.thanhhuystore.com</a>",
+                        <strong>WebApp:</strong> <a href='https://thanh-huy-motorbike.vercel.app/login' target='_blank'>https://thanh-huy-motorbike.vercel.app/login</a>",
                     Version = "v1"
                 });
                 c.DescribeAllParametersInCamelCase();
