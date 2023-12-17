@@ -131,7 +131,8 @@ namespace ARTHS_Service.Implementations
                 Description = model.Description,
                 Status = RepairBookingStatus.WaitForConfirm,
                 OrderId = null,
-                StaffId = model.StaffId
+                StaffId = model.StaffId,
+                CreateAt = DateTime.UtcNow.AddHours(7)
             };
             _repairBookingRepository.Add(booking);
             var result = await _unitOfWork.SaveChanges();

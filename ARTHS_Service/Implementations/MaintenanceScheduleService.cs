@@ -46,6 +46,7 @@ namespace ARTHS_Service.Implementations
                .Take(pagination.PageSize);
             var schedules = await paginatedQuery
                 .ProjectTo<MaintenanceScheduleViewModel>(_mapper.ConfigurationProvider)
+                .OrderBy(m => m.NextMaintenanceDate)
                 .AsNoTracking()
                 .ToListAsync();
             return new ListViewModel<MaintenanceScheduleViewModel>
